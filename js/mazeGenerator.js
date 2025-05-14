@@ -215,32 +215,38 @@ export class MazeGenerator {
     createMazeGeometry() {
         const group = new THREE.Group();
 
-        // 创建地板
-        const floorGeometry = new THREE.PlaneGeometry(
-            this.width * this.cellSize,
-            this.height * this.cellSize
-        );
-        const floorMaterial = new THREE.MeshStandardMaterial({
-            color: 0x2E4053,
-            roughness: 0.9,
-            metalness: 0.1
-        });
-        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-        floor.rotation.x = -Math.PI / 2;
-        floor.position.set(
-            (this.width * this.cellSize) / 2 - this.cellSize / 2,
-            0,
-            (this.height * this.cellSize) / 2 - this.cellSize / 2
-        );
-        group.add(floor);
+// 创建地板
+const floorTexture = new THREE.TextureLoader().load('textures/floor.png'); // Load the floor texture
+const floorMaterial = new THREE.MeshStandardMaterial({
+    map: floorTexture, // Use the texture instead of a solid color
+    roughness: 0.9,
+    metalness: 0.1
+});
 
-        // 创建墙壁
-        const wallMaterial = new THREE.MeshStandardMaterial({
-            color: 0xD5DBDB,
-            roughness: 0.7,
-            metalness: 0.2,
-            side: THREE.DoubleSide // 双面渲染
-        });
+const floorGeometry = new THREE.PlaneGeometry(
+    this.width * this.cellSize,
+    this.height * this.cellSize
+);
+const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+floor.rotation.x = -Math.PI / 2;
+floor.position.set(
+    (this.width * this.cellSize) / 2 - this.cellSize / 2,
+    0,
+    (this.height * this.cellSize) / 2 - this.cellSize / 2
+);
+group.add(floor);
+
+
+   // 创建墙壁
+const wallTexture = new THREE.TextureLoader().load('textures/wall.png'); // Load the wall texture
+
+const wallMaterial = new THREE.MeshStandardMaterial({
+    map: wallTexture, // Use the texture instead of a solid color
+    roughness: 0.7,
+    metalness: 0.2,
+    side: THREE.DoubleSide // 双面渲染
+});
+
 
         // 创建起点和终点标记
         const startMaterial = new THREE.MeshStandardMaterial({
