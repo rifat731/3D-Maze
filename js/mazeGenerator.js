@@ -44,8 +44,8 @@ export class MazeGenerator {
 
         this.endPos = bestEndPos;
 
-        this.clearArea(this.startPos.x, this.startPos.y, 2);
-        this.clearArea(this.endPos.x, this.endPos.y, 2);
+        this.clearArea(this.startPos.x, this.startPos.y, 1);
+        this.clearArea(this.endPos.x, this.endPos.y, 1);
   
     }
 
@@ -55,9 +55,65 @@ export class MazeGenerator {
                 if (this.isValid(x, y)) {
                     this.maze[y][x] = 0;
                     this.visited[y][x] = true;
+                
+                }
+                
+                if(this.isValid(y,x+1) && x > centerX + radius)
+                {
+                    this.visited[y][x+1] = true;
+                    if (y > centerY + radius)
+                    {
+                        this.visited[y+1][x + 1] = true;
+                    }
+                    else if(y==0)
+                    {
+                        this.visited[y -1][x + 1] = true;
+                    }
+                }
+                if (this.isValid(y, x - 1) && x == 0) {
+                    this.visited[y][x - 1] = true;
+                    if (y > centerY + radius) {
+                        this.visited[y + 1][x - 1] = true;
+                    }
+                    else if (y == 0) {
+                        this.visited[y - 1][x - 1] = true;
+                        }
+                    }
+                if (this.isValid(y+1, x  ) && y > centerY + radius) {
+                    this.visited[y+1][x  ] = true;
+                    if(x > centerX + radius)
+                    {
+                        this.visited[y + 1][x + 1] = true;
+                    }
+                    else if (x == 0) {
+                        this.visited[y + 1][x - 1] = true;
+                        }
+                        }
+                if (this.isValid(y-1, x ) && y == 0) {
+                    this.visited[y-1][x ] = true;
+                    if(x > centerX + radius)
+                    {
+                        this.visited[y -1 ][x + 1] = true;
+                    }
+                    else if (x == 0) {
+                        this.visited[y - 1][x - 1] = true;
+                    }
+                            }
+            }
+        }
+    }
+
+    hasSpotBeenVisited(centerX, centerY, radius)
+    {
+        for (let y = centerY - radius; y <= centerY + radius; y++) {
+            for (let x = centerX - radius; x <= centerX + radius; x++) {
+                if(this.visited[y][x] == true)
+                {
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     generate() {
@@ -65,13 +121,15 @@ export class MazeGenerator {
        
 
          //this.generateMaze(this.startPos.x, this.startPos.y);
-        //this.generateRoom(3, 3, 2, 2);
-      //  this.ensureEndReachable();
       var safeDistance = 2;
-       // this.generateMaze(this.startPos.x, this.startPos.y);
-    
-        
+        this.generateMaze(this.startPos.x, this.startPos.y);
+
+        for (let e = 0; e < this.specialRooms.length; e++) {
+            console.log("We are finding the path between rooms");
+            this.ensureRoomReachable(this.specialRooms[e]);
+        }
         this.ensureEndReachable();
+      //  this.generateMaze(this.startPos.x, this.startPos.y);
 
         return this.createMazeGeometry();
     }
@@ -87,13 +145,17 @@ export class MazeGenerator {
         this.clearArea(this.startPos.x, this.startPos.y, 1);
         this.clearArea(this.endPos.x, this.endPos.y, 1);
         var safeDistance = 2;
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < this.roomSizes; i++) {
             const roomPos = {
                 x: safeDistance + Math.floor(Math.random() * (this.width - 2 * safeDistance)),
                 y: safeDistance + Math.floor(Math.random() * (this.height - 2 * safeDistance))
             };
+            if(this.hasSpotBeenVisited(roomPos.x, roomPos.y, 1) == false)
+            {
             this.generateRoom(roomPos.x, roomPos.y);
+            }
         }
+        
     }
 
     generateMaze(x, y) {
@@ -117,9 +179,12 @@ export class MazeGenerator {
             const newY = y + dy * 2;
 
             if (this.isValid(newX, newY) && !this.visited[newY][newX]) {
+                console.log("This has been called");
                 if (this.isInRoom(newX, newY)) {
+                    console.log("This has been called 1");
                     continue;
                 }
+                console.log("This has been called 2");
                 this.maze[y + dy][x + dx] = 0;
                 this.generateMaze(newX, newY);
             }
@@ -143,7 +208,7 @@ export class MazeGenerator {
         this.clearArea(x,y, 1);
         //this.maze[x][y] = 0;
         //this.visited[x][y] = true;
-        this.ensureRoomReachable((x,y))
+        //this.ensureRoomReachable((x,y))
         this.specialRooms.push({x,y});
     }
     isInRoom(x,y)
@@ -170,9 +235,17 @@ export class MazeGenerator {
             
             return false;
         };
-
-        if (!hasPath(this.startPos.x, this.startPos.y)) {
-            this.createPathToEnd();
+        if(this.specialRooms.length != 0)
+        {
+            if (!hasPath(this.specialRooms[this.specialRooms.length - 1].x, this.specialRooms[this.specialRooms.length - 1].y)) {
+                this.createPathToEnd();
+            }
+        }
+        else
+        {
+            if (!hasPath(this.startPos.x, this.startPos.y)) {
+                this.createPathToEnd();
+            }
         }
     }
 
@@ -181,14 +254,19 @@ export class MazeGenerator {
         const visited = Array(this.height).fill().map(() => Array(this.width).fill(false));
 
         var aimedPosition;
-        if (this.specialRooms.length <= 1) {
+        if(this.specialRooms.indexOf(doorPos)+1 != this.specialRooms.length)
+        {
+            aimedPosition = this.specialRooms[this.specialRooms.indexOf(doorPos) +1];
+        }
+        else
+        {
             aimedPosition = this.startPos;
         }
-        else {
-            aimedPosition = (this.specialRooms[this.specialRooms.length - 1].x, this.specialRooms[this.specialRooms.length - 1].y);
-        }
+   //     else {
+     //       aimedPosition = (this.specialRooms[this.specialRooms.indexOf(doorPos) - 1].x, this.specialRooms[this.specialRooms.indexOf(doorPos)-1].y);
+     //   }
         const hasPath = (x, y) => {
-            if (x === doorPos.x && y === doorPos.y) return true;
+            if (x === this.startPos.x && y === this.startPos.y) return true;
             if (!this.isValid(x, y) || this.maze[y][x] === 1 || visited[y][x]) return false;
 
             visited[y][x] = true;
@@ -199,18 +277,17 @@ export class MazeGenerator {
             }
             return false;
         };
-        
-
-        
-
-        if (!hasPath(aimedPosition.x, aimedPosition.y)) {
-            this.createPathToRoom(aimedPosition, doorPos);
+        if (!hasPath(doorPos.x, doorPos.y)) {
+            this.createPathToRoom(doorPos, aimedPosition);
         }
 
     }
 
     createPathToEnd() {
-        const path = this.findShortestPath(this.specialRooms[this.specialRooms.length-1], this.endPos);
+        var path = null;
+
+             path = this.findShortestPath(this.startPos, this.endPos);
+        
         if (path) {
             for (let i = 0; i < path.length - 1; i++) {
                 const current = path[i];
@@ -228,7 +305,7 @@ export class MazeGenerator {
 
     createPathToRoom(doorPos, aimedPos)
     {
-        const path = this.findShortestPath(aimedPos, doorPos)
+        const path = this.findShortestPath(doorPos, aimedPos);
         if (path) {
             for (let i = 0; i < path.length - 1; i++) {
                 const current = path[i];
