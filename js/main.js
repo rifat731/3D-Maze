@@ -21,6 +21,11 @@ class Game {
             1000
         );
         this.camera.position.y = 1.6;
+        this.mapCamera = new THREE.PerspectiveCamera(75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -32,12 +37,20 @@ class Game {
         this.controls = new PointerLockControls(this.camera, document.body);
 
         this.player = new Player(this.camera, this.scene);
+        this.mesh = (new THREE.Mesh(new THREE.BoxGeometry(5, 1, 1), new THREE.MeshBasicMaterial()));
+        //this.camera.add(this.mesh);
+        this.camera.add(this.mesh);
+         this.mesh.position.set(this.camera.position);
+        
 
         this.setupMaze();
 
         this.gameUI = new GameUI();
 
         this.setupEventListeners();
+        this.mapCamera.position.y = 50;
+        //this.mapCamera.lookAt(0,0,0);
+
 
         this.animate();
 
@@ -47,13 +60,18 @@ class Game {
     setupMaze() {
         const baseSize = 15;
         const mazeSize = baseSize + (this.currentLevel - 1) * 2;
+        this.mapCamera.position.set(mazeSize/8 , 50,1);
+        this.mapCamera.lookAt(mazeSize/8, 0, 1);
+        
         
         this.mazeGenerator = new MazeGenerator(mazeSize, mazeSize);
         
         const maze = this.mazeGenerator.generate();
         this.scene.add(maze);
+        
 
         const { start } = this.mazeGenerator.getStartAndEnd();
+        this.mesh.position.set(start);
         this.camera.position.set(start.x, start.y, start.z);
     }
 
@@ -131,10 +149,12 @@ class Game {
 
         if (this.controls.isLocked) {
             this.player.update();
+            
             this.checkEndReached();
         }
 
         this.gameUI.update();
+        this.mesh.position.set(this.camera.position);
         this.renderer.render(this.scene, this.camera);
     }
 }

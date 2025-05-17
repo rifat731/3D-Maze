@@ -10,7 +10,7 @@ export class MazeGenerator {
         this.maze = Array(height).fill().map(() => Array(width).fill(1));
         this.visited = Array(height).fill().map(() => Array(width).fill(false));
         this.specialRooms = [];
-        this.roomSizes = 4;
+        this.roomSizes = Math.floor(width/5);
         this.generateStartAndEnd();
     }
 
@@ -125,11 +125,11 @@ export class MazeGenerator {
         this.generateMaze(this.startPos.x, this.startPos.y);
 
         for (let e = 0; e < this.specialRooms.length; e++) {
-            console.log("We are finding the path between rooms");
+
             this.ensureRoomReachable(this.specialRooms[e]);
         }
         this.ensureEndReachable();
-      //  this.generateMaze(this.startPos.x, this.startPos.y);
+      // this.generateMaze(this.startPos.x, this.startPos.y);
 
         return this.createMazeGeometry();
     }
@@ -153,6 +153,7 @@ export class MazeGenerator {
             if(this.hasSpotBeenVisited(roomPos.x, roomPos.y, 1) == false)
             {
             this.generateRoom(roomPos.x, roomPos.y);
+            console.log("Generating room here");
             }
         }
         
@@ -179,12 +180,12 @@ export class MazeGenerator {
             const newY = y + dy * 2;
 
             if (this.isValid(newX, newY) && !this.visited[newY][newX]) {
-                console.log("This has been called");
+
                 if (this.isInRoom(newX, newY)) {
-                    console.log("This has been called 1");
+          
                     continue;
                 }
-                console.log("This has been called 2");
+     
                 this.maze[y + dy][x + dx] = 0;
                 this.generateMaze(newX, newY);
             }
