@@ -5,7 +5,7 @@ export class Player {
         this.camera = camera;
         this.scene = scene;
         this.moveSpeed = 0.1;
-        this.jumpForce = 40;
+        this.jumpForce = 60;
         this.gravity = 1;
         this.velocity = new THREE.Vector3();
         this.direction = new THREE.Vector3();

@@ -10,7 +10,7 @@ export class MazeGenerator {
         this.maze = Array(height).fill().map(() => Array(width).fill(1));
         this.visited = Array(height).fill().map(() => Array(width).fill(false));
         this.specialRooms = [];
-        this.roomSizes = Math.floor(width/5);
+        this.roomSizes = Math.floor(height/4);
         this.generateStartAndEnd();
     }
 
@@ -120,9 +120,9 @@ export class MazeGenerator {
         this.initializeMaze();
        
 
-         //this.generateMaze(this.startPos.x, this.startPos.y);
+         this.generateMaze(this.startPos.x, this.startPos.y);
       var safeDistance = 2;
-        this.generateMaze(this.startPos.x, this.startPos.y);
+       // this.generateMaze(this.startPos.x, this.startPos.y);
 
         for (let e = 0; e < this.specialRooms.length; e++) {
 
@@ -238,6 +238,7 @@ export class MazeGenerator {
         };
         if(this.specialRooms.length != 0)
         {
+            
             if (!hasPath(this.specialRooms[this.specialRooms.length - 1].x, this.specialRooms[this.specialRooms.length - 1].y)) {
                 this.createPathToEnd();
             }
@@ -255,9 +256,16 @@ export class MazeGenerator {
         const visited = Array(this.height).fill().map(() => Array(this.width).fill(false));
 
         var aimedPosition;
+        var randomValue = Math.floor(Math.random(0, this.specialRooms.length - 1));
+        if (randomValue == this.specialRooms.indexOf(doorPos) )
+        {
+
+            randomValue = Math.floor(Math.random(0, this.specialRooms.length ));
+        
+        }
         if(this.specialRooms.indexOf(doorPos)+1 != this.specialRooms.length)
         {
-            aimedPosition = this.specialRooms[this.specialRooms.indexOf(doorPos) +1];
+            aimedPosition = this.specialRooms[randomValue];
         }
         else
         {
