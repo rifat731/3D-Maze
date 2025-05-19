@@ -1,16 +1,22 @@
 import * as THREE from 'three';
 
 export class MazeGenerator {
-    constructor(width, height) {
+    constructor(width, height, scene) {
         this.width = width;
         this.height = height;
         this.cellSize = 5;
-        this.wallHeight = 5;
+        this.wallHeight = 7;
         this.wallThickness = 0.5;
         this.maze = Array(height).fill().map(() => Array(width).fill(1));
         this.visited = Array(height).fill().map(() => Array(width).fill(false));
         this.specialRooms = [];
+        this.mazeLevels = [];
+        this.amountOfLevels =2;
         this.roomSizes = Math.floor(height/4);
+        this.canGoUp = true;
+        this.scene = scene;
+        this.starts = [];
+        this.ends = [];
         this.generateStartAndEnd();
     }
 
@@ -19,16 +25,22 @@ export class MazeGenerator {
         
         this.startPos = {
             x: safeDistance + Math.floor(Math.random() * (this.width - 2 * safeDistance)),
-            y: safeDistance + Math.floor(Math.random() * (this.height - 2 * safeDistance))
+            y: safeDistance + Math.floor(Math.random() * (this.height - 2 * safeDistance)),
+            z:1
         };
-
+        this.starts.push({
+            x: safeDistance + Math.floor(Math.random() * (this.width - 2 * safeDistance)),
+            y: safeDistance + Math.floor(Math.random() * (this.height - 2 * safeDistance)),
+            z: 1
+});
         let maxDistance = 0;
         let bestEndPos = null;
 
         for (let i = 0; i < 20; i++) {
             const testEndPos = {
                 x: safeDistance + Math.floor(Math.random() * (this.width - 2 * safeDistance)),
-                y: safeDistance + Math.floor(Math.random() * (this.height - 2 * safeDistance))
+                y: safeDistance + Math.floor(Math.random() * (this.height - 2 * safeDistance)),
+                z:1
             };
 
             const distance = Math.sqrt(
@@ -43,10 +55,53 @@ export class MazeGenerator {
         }
 
         this.endPos = bestEndPos;
+        this.ends.push(bestEndPos);
+        console.log("we be here");
+        
 
         this.clearArea(this.startPos.x, this.startPos.y, 1);
         this.clearArea(this.endPos.x, this.endPos.y, 1);
   
+    }
+
+    generateStartEndAfterFirstLevel()
+    {
+        const safeDistance = 2;
+        this.startPos = 
+        {
+            x: this.ends[this.ends.length - 1].x,
+            y: this.ends[this.ends.length - 1].y,
+            z: this.ends[this.ends.length - 1].z
+        };
+        this.starts.push(this.startPos);
+        let maxDistance = 0;
+        let bestEndPos = null;
+
+        for (let i = 0; i < 20; i++) {
+            const testEndPos = {
+                x: safeDistance + Math.floor(Math.random() * (this.width - 2 * safeDistance)),
+                y: safeDistance + Math.floor(Math.random() * (this.height - 2 * safeDistance)),
+                z: this.wallHeight * (this.mazeLevels.length - 1) 
+            };
+
+            const distance = Math.sqrt(
+                Math.pow(testEndPos.x - this.startPos.x, 2) +
+                Math.pow(testEndPos.y - this.startPos.y, 2)
+            );
+
+            if (distance > maxDistance) {
+                maxDistance = distance;
+                bestEndPos = testEndPos;
+            }
+        }
+
+        this.endPos = bestEndPos;
+        this.ends.push(bestEndPos);
+        //this.startPos = this.starts[this.starts.length - 1];
+
+        this.clearArea(this.startPos.x, this.startPos.y, 1);
+        this.clearArea(this.endPos.x, this.endPos.y, 1);
+
     }
 
     clearArea(centerX, centerY, radius) {
@@ -117,10 +172,25 @@ export class MazeGenerator {
     }
 
     generate() {
+        for(let i = 0; i < this.amountOfLevels; i++)
+        {
+            console.log("We are generating this shit");
+            this.maze.length = 0;
+            this.visited.length = 0;
+            this.visited = [];
+            this.specialRooms = [];
+            this.maze = new Array(this.height).fill().map(() => Array(this.width).fill(1));
+            this.visited = new Array(this.height).fill().map(() => Array(this.width).fill(false));
+            if(i > 0)
+            {
+                this.generateStartEndAfterFirstLevel();
+            }
+            
+        
         this.initializeMaze();
        
 
-         this.generateMaze(this.startPos.x, this.startPos.y);
+       this.generateMaze(this.startPos.x, this.startPos.y);
       var safeDistance = 2;
        // this.generateMaze(this.startPos.x, this.startPos.y);
 
@@ -129,9 +199,13 @@ export class MazeGenerator {
             this.ensureRoomReachable(this.specialRooms[e]);
         }
         this.ensureEndReachable();
+        this.mazeLevels.push(this.createMazeGeometry());
       // this.generateMaze(this.startPos.x, this.startPos.y);
-
-        return this.createMazeGeometry();
+        }
+        console.log("hehehe");
+        return this.mazeLevels[0];
+        
+    
     }
 
     initializeMaze() {
@@ -364,25 +438,26 @@ export class MazeGenerator {
     }
 
     createMazeGeometry() {
-        const group = new THREE.Group();
+        var group = new THREE.Group();
 
 // 创建地板
 const floorTexture = new THREE.TextureLoader().load('textures/floor.png'); // Load the floor texture
 const floorMaterial = new THREE.MeshStandardMaterial({
     map: floorTexture, // Use the texture instead of a solid color
     roughness: 0.9,
-    metalness: 0.1
+    metalness: 0.1,
+    side: THREE.DoubleSide
 });
 
 const floorGeometry = new THREE.PlaneGeometry(
     this.width * this.cellSize,
     this.height * this.cellSize
 );
-const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2;
 floor.position.set(
     (this.width * this.cellSize) / 2 - this.cellSize / 2,
-    0,
+   0.01 + (this.mazeLevels.length * this.wallHeight),
     (this.height * this.cellSize) / 2 - this.cellSize / 2
 );
 group.add(floor);
@@ -414,7 +489,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
             emissiveIntensity: 0.2
         });
 
-        const walls = new THREE.Group();
+        var walls = new THREE.Group();
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 if (this.maze[y][x] === 1) {
@@ -423,13 +498,20 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         this.wallHeight,
                         this.cellSize
                     );
-                    const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+                    var wall = new THREE.Mesh(wallGeometry, wallMaterial);
                     wall.position.set(
                         x * this.cellSize,
-                        this.wallHeight / 2,
+                        (this.wallHeight / 2) + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
                     walls.add(wall);
+                    var wall2 = new THREE.Mesh(wallGeometry, wallMaterial);
+                    wall2.position.set(
+                        x * this.cellSize,
+                        (this.wallHeight / 2) + (this.wallHeight * (this.mazeLevels.length - 1)),
+                        y * this.cellSize
+                    );
+                    walls.add(wall2);
 
                     const sideGeometry = new THREE.BoxGeometry(
                         this.wallThickness,
@@ -442,78 +524,99 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         this.wallThickness
                     );
 
-                    const leftWall = new THREE.Mesh(sideGeometry, wallMaterial);
+                    var leftWall = new THREE.Mesh(sideGeometry, wallMaterial);
                     leftWall.position.set(
                         x * this.cellSize - this.cellSize/2 + this.wallThickness/2,
-                        this.wallHeight / 2,
+                        (this.wallHeight / 2) + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
                     walls.add(leftWall);
 
-                    const rightWall = new THREE.Mesh(sideGeometry, wallMaterial);
+                    var rightWall = new THREE.Mesh(sideGeometry, wallMaterial);
                     rightWall.position.set(
                         x * this.cellSize + this.cellSize/2 - this.wallThickness/2,
-                        this.wallHeight / 2,
+                        (this.wallHeight / 2) + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
                     walls.add(rightWall);
 
-                    const frontWall = new THREE.Mesh(frontGeometry, wallMaterial);
+                    var frontWall = new THREE.Mesh(frontGeometry, wallMaterial);
                     frontWall.position.set(
                         x * this.cellSize,
-                        this.wallHeight / 2,
+                        (this.wallHeight / 2) + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize - this.cellSize/2 + this.wallThickness/2
                     );
                     walls.add(frontWall);
 
-                    const backWall = new THREE.Mesh(frontGeometry, wallMaterial);
+                    var backWall = new THREE.Mesh(frontGeometry, wallMaterial);
                     backWall.position.set(
                         x * this.cellSize,
-                        this.wallHeight / 2,
+                        (this.wallHeight / 2) + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize + this.cellSize/2 - this.wallThickness/2
                     );
                     walls.add(backWall);
-                } else if (x === this.startPos.x && y === this.startPos.y) {
+                } else if (x === this.startPos.x && y === this.startPos.y && this.mazeLevels.length == 1)  {
                     const startMarker = new THREE.Mesh(
                         new THREE.BoxGeometry(this.cellSize, 0.1, this.cellSize),
                         startMaterial
                     );
                     startMarker.position.set(
-                        x * this.cellSize,
-                        0.05,
-                        y * this.cellSize
+                        this.starts[0].position.x,
+                        this.starts[0].position.y,
+                        this.starts[0].position.z
                     );
                     group.add(startMarker);
                 } else if (x === this.endPos.x && y === this.endPos.y) {
+                    if (this.canGoUp == true && this.mazeLevels.length != this.amountOfLevels)
+                    {
+                        const wallGeometry = new THREE.BoxGeometry(
+                            this.cellSize,
+                            this.wallHeight*1.5,
+                            this.cellSize
+                        );
+                        const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+                        wall.position.set(
+                            x * this.cellSize,
+                            0.05 + (this.wallHeight * (this.mazeLevels.length - 1)),
+                            y * this.cellSize
+                        );
+                        wall.scale.set(1,2,1);
+                        wall.rotation.set(45,0,0);
+                        walls.add(wall);
+                    }
+                    else
+                    {
                     const endMarker = new THREE.Mesh(
                         new THREE.BoxGeometry(this.cellSize, 0.1, this.cellSize),
                         endMaterial
                     );
                     endMarker.position.set(
                         x * this.cellSize,
-                        0.05,
+                        0.05 + (this.wallHeight * (this.mazeLevels.length -1)),
                         y * this.cellSize
                     );
                     group.add(endMarker);
                 }
+                }
             }
         }
         group.add(walls);
-
+        this.scene.add(group);
+        console.log(group);
         return group;
     }
 
     getStartAndEnd() {
         return {
             start: {
-                x: this.startPos.x * this.cellSize,
+                x: this.starts[0].x * this.cellSize,
                 y: 1,
-                z: this.startPos.y * this.cellSize
+                z: this.starts[0].z * this.cellSize
             },
             end: {
-                x: this.endPos.x * this.cellSize,
-                y: 0,
-                z: this.endPos.y * this.cellSize
+                x: this.ends[this.ends.length - 1].x * this.cellSize,
+                y: this.ends[this.ends.length - 1].z,
+                z: this.ends[this.ends.length - 1].y * this.cellSize
             }
         };
     }

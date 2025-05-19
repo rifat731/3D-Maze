@@ -64,10 +64,10 @@ class Game {
         this.mapCamera.lookAt(mazeSize/8, 0, 1);
         
         
-        this.mazeGenerator = new MazeGenerator(mazeSize, mazeSize);
+        this.mazeGenerator = new MazeGenerator(mazeSize, mazeSize, this.scene);
         
         const maze = this.mazeGenerator.generate();
-        this.scene.add(maze);
+        //this.scene.add(maze);
         
 
         const { start } = this.mazeGenerator.getStartAndEnd();
@@ -122,9 +122,10 @@ class Game {
         const { end } = this.mazeGenerator.getStartAndEnd();
         const playerX = Math.round(this.camera.position.x / this.mazeGenerator.cellSize);
         const playerZ = Math.round(this.camera.position.z / this.mazeGenerator.cellSize);
+        const playerY = Math.round(this.camera.position.y / this.mazeGenerator.wallHeight );
 
         if (playerX === Math.round(end.x / this.mazeGenerator.cellSize) && 
-            playerZ === Math.round(end.z / this.mazeGenerator.cellSize)) {
+            playerZ === Math.round(end.z / this.mazeGenerator.cellSize) && playerY === Math.round(end.y / (this.mazeGenerator.amountOfLevels -1) * this.mazeGenerator.wallHeight)) {
             this.nextLevel();
         }
     }
