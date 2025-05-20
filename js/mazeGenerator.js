@@ -5,13 +5,13 @@ export class MazeGenerator {
         this.width = width;
         this.height = height;
         this.cellSize = 5;
-        this.wallHeight = 7;
+        this.wallHeight = 10;
         this.wallThickness = 0.5;
         this.maze = Array(height).fill().map(() => Array(width).fill(1));
         this.visited = Array(height).fill().map(() => Array(width).fill(false));
         this.specialRooms = [];
         this.mazeLevels = [];
-        this.amountOfLevels =2;
+        this.amountOfLevels =5;
         this.roomSizes = Math.floor(height/4);
         this.canGoUp = true;
         this.scene = scene;
@@ -29,12 +29,12 @@ export class MazeGenerator {
             z:1
         };
         this.starts.push({
-            x: safeDistance + Math.floor(Math.random() * (this.width - 2 * safeDistance)),
-            y: safeDistance + Math.floor(Math.random() * (this.height - 2 * safeDistance)),
+            x: this.startPos.x,
+            y: this.startPos.y,
             z: 1
 });
         let maxDistance = 0;
-        let bestEndPos = null;
+        var bestEndPos = null;
 
         for (let i = 0; i < 20; i++) {
             const testEndPos = {
@@ -60,6 +60,7 @@ export class MazeGenerator {
         
 
         this.clearArea(this.startPos.x, this.startPos.y, 1);
+        console.log("creating strart point");
         this.clearArea(this.endPos.x, this.endPos.y, 1);
   
     }
@@ -67,13 +68,14 @@ export class MazeGenerator {
     generateStartEndAfterFirstLevel()
     {
         const safeDistance = 2;
-        this.startPos = 
+        var tempStartPos = 
         {
             x: this.ends[this.ends.length - 1].x,
             y: this.ends[this.ends.length - 1].y,
-            z: this.ends[this.ends.length - 1].z
+            z: this.ends[this.ends.length - 1].z 
         };
-        this.starts.push(this.startPos);
+
+        this.starts.push(tempStartPos);
         let maxDistance = 0;
         let bestEndPos = null;
 
@@ -85,8 +87,8 @@ export class MazeGenerator {
             };
 
             const distance = Math.sqrt(
-                Math.pow(testEndPos.x - this.startPos.x, 2) +
-                Math.pow(testEndPos.y - this.startPos.y, 2)
+                Math.pow(testEndPos.x - this.starts[this.starts.length - 1].x, 2) +
+                Math.pow(testEndPos.y - this.starts[this.starts.length - 1].y, 2)
             );
 
             if (distance > maxDistance) {
@@ -100,6 +102,7 @@ export class MazeGenerator {
         //this.startPos = this.starts[this.starts.length - 1];
 
         this.clearArea(this.startPos.x, this.startPos.y, 1);
+        console.log("Creating start point");
         this.clearArea(this.endPos.x, this.endPos.y, 1);
 
     }
@@ -190,7 +193,7 @@ export class MazeGenerator {
         this.initializeMaze();
        
 
-       this.generateMaze(this.startPos.x, this.startPos.y);
+            this.generateMaze(this.starts[this.starts.length - 1].x, this.starts[this.starts.length - 1].y);
       var safeDistance = 2;
        // this.generateMaze(this.startPos.x, this.startPos.y);
 
@@ -216,7 +219,7 @@ export class MazeGenerator {
             }
         }
 
-        this.clearArea(this.startPos.x, this.startPos.y, 1);
+        this.clearArea(this.starts[this.starts.length - 1].x, this.starts[this.starts.length - 1].y , 1);
         this.clearArea(this.endPos.x, this.endPos.y, 1);
         var safeDistance = 2;
         for (let i = 0; i < this.roomSizes; i++) {
@@ -457,7 +460,7 @@ var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2;
 floor.position.set(
     (this.width * this.cellSize) / 2 - this.cellSize / 2,
-   0.01 + (this.mazeLevels.length * this.wallHeight),
+   0.01 + (this.mazeLevels.length * this.wallHeight) - this.wallHeight/2,
     (this.height * this.cellSize) / 2 - this.cellSize / 2
 );
 group.add(floor);
@@ -501,14 +504,14 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                     var wall = new THREE.Mesh(wallGeometry, wallMaterial);
                     wall.position.set(
                         x * this.cellSize,
-                        (this.wallHeight / 2) + (this.wallHeight * (this.mazeLevels.length )),
+                        (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
                     walls.add(wall);
                     var wall2 = new THREE.Mesh(wallGeometry, wallMaterial);
                     wall2.position.set(
                         x * this.cellSize,
-                        (this.wallHeight / 2) + (this.wallHeight * (this.mazeLevels.length - 1)),
+                        (this.wallHeight * (this.mazeLevels.length  )),
                         y * this.cellSize
                     );
                     walls.add(wall2);
@@ -527,7 +530,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                     var leftWall = new THREE.Mesh(sideGeometry, wallMaterial);
                     leftWall.position.set(
                         x * this.cellSize - this.cellSize/2 + this.wallThickness/2,
-                        (this.wallHeight / 2) + (this.wallHeight * (this.mazeLevels.length )),
+                        (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
                     walls.add(leftWall);
@@ -535,7 +538,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                     var rightWall = new THREE.Mesh(sideGeometry, wallMaterial);
                     rightWall.position.set(
                         x * this.cellSize + this.cellSize/2 - this.wallThickness/2,
-                        (this.wallHeight / 2) + (this.wallHeight * (this.mazeLevels.length )),
+                        (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
                     walls.add(rightWall);
@@ -543,7 +546,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                     var frontWall = new THREE.Mesh(frontGeometry, wallMaterial);
                     frontWall.position.set(
                         x * this.cellSize,
-                        (this.wallHeight / 2) + (this.wallHeight * (this.mazeLevels.length )),
+                        (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize - this.cellSize/2 + this.wallThickness/2
                     );
                     walls.add(frontWall);
@@ -551,33 +554,33 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                     var backWall = new THREE.Mesh(frontGeometry, wallMaterial);
                     backWall.position.set(
                         x * this.cellSize,
-                        (this.wallHeight / 2) + (this.wallHeight * (this.mazeLevels.length )),
+                        (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize + this.cellSize/2 - this.wallThickness/2
                     );
                     walls.add(backWall);
-                } else if (x === this.startPos.x && y === this.startPos.y && this.mazeLevels.length == 1)  {
+                } else if (x === this.startPos.x && y === this.startPos.y && this.mazeLevels.length === 1)  {
                     const startMarker = new THREE.Mesh(
                         new THREE.BoxGeometry(this.cellSize, 0.1, this.cellSize),
                         startMaterial
                     );
                     startMarker.position.set(
-                        this.starts[0].position.x,
-                        this.starts[0].position.y,
-                        this.starts[0].position.z
+                        x* this.cellSize,
+                        0.03 + ((this.mazeLevels.length - 1) * this.wallHeight) - this.wallHeight / 2,
+                        y* this.cellSize
                     );
                     group.add(startMarker);
                 } else if (x === this.endPos.x && y === this.endPos.y) {
-                    if (this.canGoUp == true && this.mazeLevels.length != this.amountOfLevels)
+                    if (this.canGoUp == true && this.mazeLevels.length != this.amountOfLevels - 1)
                     {
                         const wallGeometry = new THREE.BoxGeometry(
                             this.cellSize,
-                            this.wallHeight*1.5,
+                            this.wallHeight,
                             this.cellSize
                         );
                         const wall = new THREE.Mesh(wallGeometry, wallMaterial);
                         wall.position.set(
                             x * this.cellSize,
-                            0.05 + (this.wallHeight * (this.mazeLevels.length - 1)),
+                            (this.wallHeight * (this.mazeLevels.length)),
                             y * this.cellSize
                         );
                         wall.scale.set(1,2,1);
@@ -592,7 +595,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                     );
                     endMarker.position.set(
                         x * this.cellSize,
-                        0.05 + (this.wallHeight * (this.mazeLevels.length -1)),
+                        0.03 + ((this.mazeLevels.length) * this.wallHeight) - this.wallHeight / 2,
                         y * this.cellSize
                     );
                     group.add(endMarker);
@@ -609,14 +612,14 @@ const wallMaterial = new THREE.MeshStandardMaterial({
     getStartAndEnd() {
         return {
             start: {
-                x: this.starts[0].x * this.cellSize,
-                y: 1,
-                z: this.starts[0].z * this.cellSize
+                x: this.startPos.x * this.cellSize,
+                y: 0,
+                z: this.startPos.y * this.cellSize
             },
             end: {
-                x: this.ends[this.ends.length - 1].x * this.cellSize,
-                y: this.ends[this.ends.length - 1].z,
-                z: this.ends[this.ends.length - 1].y * this.cellSize
+                x: this.endPos.x * this.cellSize,
+                y: 0.03 + (( this.mazeLevels.length) * this.wallHeight ) - this.wallHeight / 2,
+                z: this.endPos.y * this.cellSize
             }
         };
     }

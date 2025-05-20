@@ -67,6 +67,7 @@ class Game {
         this.mazeGenerator = new MazeGenerator(mazeSize, mazeSize, this.scene);
         
         const maze = this.mazeGenerator.generate();
+        this.player.maxJumpHeight = this.mazeGenerator.amountOfLevels * this.mazeGenerator.wallHeight;
         //this.scene.add(maze);
         
 
@@ -122,10 +123,10 @@ class Game {
         const { end } = this.mazeGenerator.getStartAndEnd();
         const playerX = Math.round(this.camera.position.x / this.mazeGenerator.cellSize);
         const playerZ = Math.round(this.camera.position.z / this.mazeGenerator.cellSize);
-        const playerY = Math.round(this.camera.position.y / this.mazeGenerator.wallHeight );
+        const playerY = Math.round(this.camera.position.y);
 
         if (playerX === Math.round(end.x / this.mazeGenerator.cellSize) && 
-            playerZ === Math.round(end.z / this.mazeGenerator.cellSize) && playerY === Math.round(end.y / (this.mazeGenerator.amountOfLevels -1) * this.mazeGenerator.wallHeight)) {
+            playerZ === Math.round(end.z / this.mazeGenerator.cellSize) && (playerY >= Math.round(end.y - this.mazeGenerator.wallHeight / 1.3))) {
             this.nextLevel();
         }
     }
