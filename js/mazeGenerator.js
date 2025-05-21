@@ -216,12 +216,20 @@ export class MazeGenerator {
         const group = new THREE.Group();
 
 // 创建地板
-const floorTexture = new THREE.TextureLoader().load('textures/floor.png'); // Load the floor texture
+const textureLoader = new THREE.TextureLoader();
+const floorColor = textureLoader.load('textures/f3.jpg');        // Colored JPEG
+const floorNormal = textureLoader.load('textures/f2.png'); // Base color (albedo)
+const floorRoughness = textureLoader.load('textures/roughness.png'); // Roughness map
+const floormetalness = textureLoader.load('textures/fc.png'); // Optional normal map (if available)
+
 const floorMaterial = new THREE.MeshStandardMaterial({
-    map: floorTexture, // Use the texture instead of a solid color
-    roughness: 0.9,
-    metalness: 0.1
+    map: floorColor,
+    roughnessMap: floorRoughness,
+    normalMap: floorNormal, // Comment out if you don’t have it
+    roughness: 1.0,
+    metalness: 0.5
 });
+
 
 const floorGeometry = new THREE.PlaneGeometry(
     this.width * this.cellSize,
