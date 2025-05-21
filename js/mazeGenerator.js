@@ -1,3 +1,5 @@
+
+
 import * as THREE from 'three';
 
 export class MazeGenerator {
@@ -6,29 +8,24 @@ export class MazeGenerator {
         this.height = height;
         this.cellSize = 2;
         this.wallHeight = 3;
-        this.wallThickness = 0.5; // 墙体厚度
+        this.wallThickness = 0.5;
         this.maze = Array(height).fill().map(() => Array(width).fill(1));
         this.visited = Array(height).fill().map(() => Array(width).fill(false));
-        
-        // 随机生成起点和终点
+
         this.generateStartAndEnd();
     }
 
     generateStartAndEnd() {
-        // 定义安全距离（与墙体的最小距离）
         const safeDistance = 2;
-        
-        // 在迷宫内部区域随机选择起点
+
         this.startPos = {
             x: safeDistance + Math.floor(Math.random() * (this.width - 2 * safeDistance)),
             y: safeDistance + Math.floor(Math.random() * (this.height - 2 * safeDistance))
         };
 
-        // 在距离起点较远的位置选择终点
         let maxDistance = 0;
         let bestEndPos = null;
 
-        // 尝试多个可能的终点位置，选择距离起点最远的
         for (let i = 0; i < 20; i++) {
             const testEndPos = {
                 x: safeDistance + Math.floor(Math.random() * (this.width - 2 * safeDistance)),
@@ -36,7 +33,7 @@ export class MazeGenerator {
             };
 
             const distance = Math.sqrt(
-                Math.pow(testEndPos.x - this.startPos.x, 2) + 
+                Math.pow(testEndPos.x - this.startPos.x, 2) +
                 Math.pow(testEndPos.y - this.startPos.y, 2)
             );
 
@@ -47,8 +44,6 @@ export class MazeGenerator {
         }
 
         this.endPos = bestEndPos;
-
-        // 确保起点和终点周围的格子都是空的
         this.clearArea(this.startPos.x, this.startPos.y, 2);
         this.clearArea(this.endPos.x, this.endPos.y, 2);
     }
@@ -65,29 +60,19 @@ export class MazeGenerator {
     }
 
     generate() {
-        // 初始化迷宫数组
         this.initializeMaze();
-        
-        // 从起点开始生成
         this.generateMaze(this.startPos.x, this.startPos.y);
-        
-        // 确保终点可达
         this.ensureEndReachable();
-        
-        // 创建迷宫几何体
         return this.createMazeGeometry();
     }
 
     initializeMaze() {
-        // 初始化为全墙
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 this.maze[y][x] = 1;
                 this.visited[y][x] = false;
             }
         }
-
-        // 设置起点和终点区域
         this.clearArea(this.startPos.x, this.startPos.y, 1);
         this.clearArea(this.endPos.x, this.endPos.y, 1);
     }
@@ -96,34 +81,29 @@ export class MazeGenerator {
         this.visited[y][x] = true;
         this.maze[y][x] = 0;
 
-        // 定义四个方向
         const directions = [
-            [0, -1], // 上
-            [1, 0],  // 右
-            [0, 1],  // 下
-            [-1, 0]  // 左
+            [0, -1],
+            [1, 0],
+            [0, 1],
+            [-1, 0]
         ];
 
-        // 随机打乱方向
         for (let i = directions.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [directions[i], directions[j]] = [directions[j], directions[i]];
         }
 
-        // 遍历所有方向
         for (const [dx, dy] of directions) {
             const newX = x + dx * 2;
             const newY = y + dy * 2;
 
             if (this.isValid(newX, newY) && !this.visited[newY][newX]) {
-                // 在当前位置和新位置之间开一条路
                 this.maze[y + dy][x + dx] = 0;
                 this.generateMaze(newX, newY);
             }
         }
 
-        // 在完成当前分支后尝试创建额外通道
-        if (Math.random() < 0.3) { // 30%的概率创建额外通道
+        if (Math.random() < 0.3) {
             const availableDirections = directions.filter(([dx, dy]) => {
                 const targetX = x + dx * 2;
                 const targetY = y + dy * 2;
@@ -132,30 +112,28 @@ export class MazeGenerator {
 
             if (availableDirections.length > 0) {
                 const [dx, dy] = availableDirections[Math.floor(Math.random() * availableDirections.length)];
-                this.maze[y + dy][x + dx] = 0; // 打通墙壁
+                this.maze[y + dy][x + dx] = 0;
             }
         }
     }
 
     ensureEndReachable() {
-        // 使用深度优先搜索检查是否有路径到终点
         const visited = Array(this.height).fill().map(() => Array(this.width).fill(false));
-        
+
         const hasPath = (x, y) => {
             if (x === this.endPos.x && y === this.endPos.y) return true;
             if (!this.isValid(x, y) || this.maze[y][x] === 1 || visited[y][x]) return false;
-            
+
             visited[y][x] = true;
-            const directions = [[0,1], [1,0], [0,-1], [-1,0]];
-            
+            const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+
             for (const [dx, dy] of directions) {
                 if (hasPath(x + dx, y + dy)) return true;
             }
-            
+
             return false;
         };
 
-        // 如果没有路径到终点，创建一条
         if (!hasPath(this.startPos.x, this.startPos.y)) {
             this.createPathToEnd();
         }
@@ -169,7 +147,6 @@ export class MazeGenerator {
                 const next = path[i + 1];
                 this.maze[current.y][current.x] = 0;
                 this.maze[next.y][next.x] = 0;
-                // 打通中间的墙
                 const midX = (current.x + next.x) / 2;
                 const midY = (current.y + next.y) / 2;
                 if (Number.isInteger(midX) && Number.isInteger(midY)) {
@@ -182,29 +159,26 @@ export class MazeGenerator {
     findShortestPath(start, end) {
         const queue = [[start]];
         const visited = new Set();
-        
+
         while (queue.length > 0) {
             const path = queue.shift();
-            const {x, y} = path[path.length - 1];
-            
-            if (x === end.x && y === end.y) {
-                return path;
-            }
-            
-            const directions = [[0,1], [1,0], [0,-1], [-1,0]];
+            const { x, y } = path[path.length - 1];
+
+            if (x === end.x && y === end.y) return path;
+
+            const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
             for (const [dx, dy] of directions) {
                 const newX = x + dx;
                 const newY = y + dy;
                 const key = `${newX},${newY}`;
-                
+
                 if (this.isValid(newX, newY) && !visited.has(key)) {
                     visited.add(key);
-                    const newPath = [...path, {x: newX, y: newY}];
-                    queue.push(newPath);
+                    queue.push([...path, { x: newX, y: newY }]);
                 }
             }
         }
-        
+
         return null;
     }
 
@@ -215,48 +189,42 @@ export class MazeGenerator {
     createMazeGeometry() {
         const group = new THREE.Group();
 
-// 创建地板
-const textureLoader = new THREE.TextureLoader();
-const floorColor = textureLoader.load('textures/f3.jpg');        // Colored JPEG
-const floorNormal = textureLoader.load('textures/f2.png'); // Base color (albedo)
-const floorRoughness = textureLoader.load('textures/roughness.png'); // Roughness map
-const floormetalness = textureLoader.load('textures/fc.png'); // Optional normal map (if available)
+        const textureLoader = new THREE.TextureLoader();
+        const floorColor = textureLoader.load('textures/f3.jpg');
+        const floorNormal = textureLoader.load('textures/f2.png');
+        const floorRoughness = textureLoader.load('textures/roughness.png');
+        const floormetalness = textureLoader.load('textures/fc.png');
 
-const floorMaterial = new THREE.MeshStandardMaterial({
-    map: floorColor,
-    roughnessMap: floorRoughness,
-    normalMap: floorNormal, // Comment out if you don’t have it
-    roughness: 1.0,
-    metalness: 0.5
-});
+        const floorMaterial = new THREE.MeshStandardMaterial({
+            map: floorColor,
+            roughnessMap: floorRoughness,
+            normalMap: floorNormal,
+            roughness: 1.0,
+            metalness: 0.5
+        });
 
+        const floorGeometry = new THREE.PlaneGeometry(
+            this.width * this.cellSize,
+            this.height * this.cellSize
+        );
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.set(
+            (this.width * this.cellSize) / 2 - this.cellSize / 2,
+            0,
+            (this.height * this.cellSize) / 2 - this.cellSize / 2
+        );
+        group.add(floor);
 
-const floorGeometry = new THREE.PlaneGeometry(
-    this.width * this.cellSize,
-    this.height * this.cellSize
-);
-const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-floor.rotation.x = -Math.PI / 2;
-floor.position.set(
-    (this.width * this.cellSize) / 2 - this.cellSize / 2,
-    0,
-    (this.height * this.cellSize) / 2 - this.cellSize / 2
-);
-group.add(floor);
+        const wallTexture = textureLoader.load('textures/wall.png');
 
+        const wallMaterial = new THREE.MeshStandardMaterial({
+            map: wallTexture,
+            roughness: 0.7,
+            metalness: 0.2,
+            side: THREE.DoubleSide
+        });
 
-   // 创建墙壁
-const wallTexture = new THREE.TextureLoader().load('textures/wall.png'); // Load the wall texture
-
-const wallMaterial = new THREE.MeshStandardMaterial({
-    map: wallTexture, // Use the texture instead of a solid color
-    roughness: 0.7,
-    metalness: 0.2,
-    side: THREE.DoubleSide // 双面渲染
-});
-
-
-        // 创建起点和终点标记
         const startMaterial = new THREE.MeshStandardMaterial({
             color: 0x2ECC71,
             roughness: 0.4,
@@ -264,6 +232,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
             emissive: 0x2ECC71,
             emissiveIntensity: 0.2
         });
+
         const endMaterial = new THREE.MeshStandardMaterial({
             color: 0xE74C3C,
             roughness: 0.4,
@@ -272,12 +241,11 @@ const wallMaterial = new THREE.MeshStandardMaterial({
             emissiveIntensity: 0.2
         });
 
-        // 创建墙壁组
         const walls = new THREE.Group();
+
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 if (this.maze[y][x] === 1) {
-                    // 创建主墙体
                     const wallGeometry = new THREE.BoxGeometry(
                         this.cellSize,
                         this.wallHeight,
@@ -291,7 +259,6 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                     );
                     walls.add(wall);
 
-                    // 在每个墙体周围添加四个薄板
                     const sideGeometry = new THREE.BoxGeometry(
                         this.wallThickness,
                         this.wallHeight,
@@ -303,39 +270,35 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         this.wallThickness
                     );
 
-                    // 左侧板
                     const leftWall = new THREE.Mesh(sideGeometry, wallMaterial);
                     leftWall.position.set(
-                        x * this.cellSize - this.cellSize/2 + this.wallThickness/2,
+                        x * this.cellSize - this.cellSize / 2 + this.wallThickness / 2,
                         this.wallHeight / 2,
                         y * this.cellSize
                     );
                     walls.add(leftWall);
 
-                    // 右侧板
                     const rightWall = new THREE.Mesh(sideGeometry, wallMaterial);
                     rightWall.position.set(
-                        x * this.cellSize + this.cellSize/2 - this.wallThickness/2,
+                        x * this.cellSize + this.cellSize / 2 - this.wallThickness / 2,
                         this.wallHeight / 2,
                         y * this.cellSize
                     );
                     walls.add(rightWall);
 
-                    // 前侧板
                     const frontWall = new THREE.Mesh(frontGeometry, wallMaterial);
                     frontWall.position.set(
                         x * this.cellSize,
                         this.wallHeight / 2,
-                        y * this.cellSize - this.cellSize/2 + this.wallThickness/2
+                        y * this.cellSize - this.cellSize / 2 + this.wallThickness / 2
                     );
                     walls.add(frontWall);
 
-                    // 后侧板
                     const backWall = new THREE.Mesh(frontGeometry, wallMaterial);
                     backWall.position.set(
                         x * this.cellSize,
                         this.wallHeight / 2,
-                        y * this.cellSize + this.cellSize/2 - this.wallThickness/2
+                        y * this.cellSize + this.cellSize / 2 - this.wallThickness / 2
                     );
                     walls.add(backWall);
                 } else if (x === this.startPos.x && y === this.startPos.y) {
@@ -360,11 +323,17 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         y * this.cellSize
                     );
                     group.add(endMarker);
+
+                  
+                    setTimeout(() => {
+                        endMarker.scale.y = 1000;
+                        endMarker.position.y = 0.05 + (0.1 * 1000) / 2;
+                    }, 10000);
                 }
             }
         }
-        group.add(walls);
 
+        group.add(walls);
         return group;
     }
 
@@ -372,7 +341,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
         return {
             start: {
                 x: this.startPos.x * this.cellSize,
-                y: 1, // 玩家高度设置为1
+                y: 1,
                 z: this.startPos.y * this.cellSize
             },
             end: {
@@ -382,4 +351,4 @@ const wallMaterial = new THREE.MeshStandardMaterial({
             }
         };
     }
-} 
+}
