@@ -191,11 +191,7 @@ export class MazeGenerator {
             
         
         this.initializeMaze();
-       
-
-            this.generateMaze(this.starts[this.starts.length - 1].x, this.starts[this.starts.length - 1].y);
-      var safeDistance = 2;
-       // this.generateMaze(this.startPos.x, this.startPos.y);
+        this.generateMaze(this.starts[this.starts.length - 1].x, this.starts[this.starts.length - 1].y);
 
         for (let e = 0; e < this.specialRooms.length; e++) {
 
@@ -203,9 +199,8 @@ export class MazeGenerator {
         }
         this.ensureEndReachable();
         this.mazeLevels.push(this.createMazeGeometry());
-      // this.generateMaze(this.startPos.x, this.startPos.y);
+
         }
-        console.log("hehehe");
         return this.mazeLevels[0];
         
     
@@ -348,9 +343,6 @@ export class MazeGenerator {
         {
             aimedPosition = this.startPos;
         }
-   //     else {
-     //       aimedPosition = (this.specialRooms[this.specialRooms.indexOf(doorPos) - 1].x, this.specialRooms[this.specialRooms.indexOf(doorPos)-1].y);
-     //   }
         const hasPath = (x, y) => {
             if (x === this.startPos.x && y === this.startPos.y) return true;
             if (!this.isValid(x, y) || this.maze[y][x] === 1 || visited[y][x]) return false;
@@ -443,7 +435,6 @@ export class MazeGenerator {
     createMazeGeometry() {
         var group = new THREE.Group();
 
-// 创建地板
 const floorTexture = new THREE.TextureLoader().load('textures/floor.png'); // Load the floor texture
 const floorMaterial = new THREE.MeshStandardMaterial({
     map: floorTexture, // Use the texture instead of a solid color
@@ -460,20 +451,20 @@ var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2;
 floor.position.set(
     (this.width * this.cellSize) / 2 - this.cellSize / 2,
-   0.01 + (this.mazeLevels.length * this.wallHeight) - this.wallHeight/2,
+    0.01 + (this.mazeLevels.length * this.wallHeight) - this.wallHeight/2,
     (this.height * this.cellSize) / 2 - this.cellSize / 2
 );
 group.add(floor);
 
 
-   // 创建墙壁
+ 
 const wallTexture = new THREE.TextureLoader().load('textures/wall.png'); // Load the wall texture
 
 const wallMaterial = new THREE.MeshStandardMaterial({
     map: wallTexture, // Use the texture instead of a solid color
     roughness: 0.7,
     metalness: 0.2,
-    side: THREE.DoubleSide // 双面渲染
+    side: THREE.DoubleSide 
 });
 
 
