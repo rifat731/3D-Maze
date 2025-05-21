@@ -58,6 +58,7 @@ class Game {
         const maze = this.mazeGenerator.generate();
         this.player.maxJumpHeight = this.mazeGenerator.amountOfLevels * this.mazeGenerator.wallHeight;
         //this.scene.add(maze);
+        //this.player.maxJumpHeight = 500;
         
 
         const { start } = this.mazeGenerator.getStartAndEnd();
