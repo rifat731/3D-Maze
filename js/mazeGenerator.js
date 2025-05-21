@@ -328,7 +328,7 @@ export class MazeGenerator {
                     setTimeout(() => {
                         endMarker.scale.y = 1000;
                         endMarker.position.y = 0.05 + (0.1 * 1000) / 2;
-                    }, 10000);
+                    }, 20000);
                 }
             }
         }
