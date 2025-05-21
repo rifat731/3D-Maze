@@ -44,6 +44,7 @@ export class MazeGenerator {
         }
 
         this.endPos = bestEndPos;
+
         this.clearArea(this.startPos.x, this.startPos.y, 2);
         this.clearArea(this.endPos.x, this.endPos.y, 2);
     }
@@ -61,8 +62,15 @@ export class MazeGenerator {
 
     generate() {
         this.initializeMaze();
+
         this.generateMaze(this.startPos.x, this.startPos.y);
         this.ensureEndReachable();
+
+        
+        this.generateMaze(this.startPos.x, this.startPos.y);
+        
+        this.ensureEndReachable();
+
         return this.createMazeGeometry();
     }
 
@@ -73,6 +81,7 @@ export class MazeGenerator {
                 this.visited[y][x] = false;
             }
         }
+
         this.clearArea(this.startPos.x, this.startPos.y, 1);
         this.clearArea(this.endPos.x, this.endPos.y, 1);
     }
@@ -189,6 +198,7 @@ export class MazeGenerator {
     createMazeGeometry() {
         const group = new THREE.Group();
 
+
         const textureLoader = new THREE.TextureLoader();
         const floorColor = textureLoader.load('textures/f3.jpg');
         const floorNormal = textureLoader.load('textures/f2.png');
@@ -203,6 +213,7 @@ export class MazeGenerator {
             metalness: 0.5
         });
 
+
         const floorGeometry = new THREE.PlaneGeometry(
             this.width * this.cellSize,
             this.height * this.cellSize
@@ -216,7 +227,9 @@ export class MazeGenerator {
         );
         group.add(floor);
 
+
         const wallTexture = textureLoader.load('textures/wall.png');
+
 
         const wallMaterial = new THREE.MeshStandardMaterial({
             map: wallTexture,
@@ -351,4 +364,4 @@ export class MazeGenerator {
             }
         };
     }
-}
+
