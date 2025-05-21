@@ -56,11 +56,9 @@ export class MazeGenerator {
 
         this.endPos = bestEndPos;
         this.ends.push(bestEndPos);
-        console.log("we be here");
         
 
         this.clearArea(this.startPos.x, this.startPos.y, 1);
-        console.log("creating strart point");
         this.clearArea(this.endPos.x, this.endPos.y, 1);
   
     }
@@ -102,7 +100,6 @@ export class MazeGenerator {
         //this.startPos = this.starts[this.starts.length - 1];
 
         this.clearArea(this.startPos.x, this.startPos.y, 1);
-        console.log("Creating start point");
         this.clearArea(this.endPos.x, this.endPos.y, 1);
 
     }
@@ -177,7 +174,6 @@ export class MazeGenerator {
     generate() {
         for(let i = 0; i < this.amountOfLevels; i++)
         {
-            console.log("We are generating this shit");
             this.maze.length = 0;
             this.visited.length = 0;
             this.visited = [];
