@@ -26,7 +26,12 @@ export class Player {
         this.maxJumpHeight = 20.0;
 
         this.raycaster = new THREE.Raycaster();
+        this.raycaster2 = new THREE.Raycaster();
         this.groundCheckRay = new THREE.Vector3(0, -1, 0);
+        this.roofCheckRay = new THREE.Vector3(0,1,0);
+        this.camera.add(this.groundCheckRay);
+        this.camera.add(this.roofCheckRay);
+        this.camera.add(this.raycaster);
     }
 
     handleKeyDown(event) {
@@ -117,11 +122,20 @@ export class Player {
         this.raycaster.set(this.camera.position, this.groundCheckRay);
         const intersects = this.raycaster.intersectObjects(this.scene.children, true);
         
-        if (intersects.length > 0 && intersects[0].distance < 2) {
+        if (intersects.length > 0 && intersects[0].distance < this.playerHeight) {
             if (this.velocity.y < 0) {
                 this.velocity.y = 0;
                 this.camera.position.y = intersects[0].point.y + this.playerHeight;
+                console.log("We sjould now be taller");
                 this.canJump = true;
+            }
+        }
+        this.raycaster2.set(this.camera.position, this.roofCheckRay);
+        const intersects2 = this.raycaster2.intersectObjects(this.scene.children, true);
+        if (intersects2.length > 0 && intersects2[0].distance < this.playerHeight) {
+            if (this.velocity.y > 0) {
+                this.velocity.y = 0;
+                console.log("you hit your head");
             }
         }
 

@@ -613,7 +613,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
         return {
             start: {
                 x: this.startPos.x * this.cellSize,
-                y: 0,
+                y:  -this.wallHeight,
                 z: this.startPos.y * this.cellSize
             },
             end: {

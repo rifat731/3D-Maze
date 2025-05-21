@@ -1,3 +1,4 @@
+
 export class GameUI {
     constructor() {
         this.levelInfo = document.getElementById('level-info');
@@ -5,7 +6,9 @@ export class GameUI {
         this.instructions = document.getElementById('instructions');
         this.startTime = Date.now();
         this.currentLevel = 1;
+
     }
+    
 
     showGameUI() {
         document.getElementById('menu').style.display = 'none';
@@ -18,10 +21,12 @@ export class GameUI {
     }
 
     update() {
+
         const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
         const minutes = Math.floor(elapsed / 60);
         const seconds = elapsed % 60;
         this.timer.textContent = `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
     }
 
     updateLevel(level) {
