@@ -1,3 +1,5 @@
+
+
 import * as THREE from 'three';
 
 export class MazeGenerator {
@@ -44,7 +46,7 @@ export class MazeGenerator {
             };
 
             const distance = Math.sqrt(
-                Math.pow(testEndPos.x - this.startPos.x, 2) + 
+                Math.pow(testEndPos.x - this.startPos.x, 2) +
                 Math.pow(testEndPos.y - this.startPos.y, 2)
             );
 
@@ -102,6 +104,8 @@ export class MazeGenerator {
         this.clearArea(this.startPos.x, this.startPos.y, 1);
         this.clearArea(this.endPos.x, this.endPos.y, 1);
 
+        this.clearArea(this.startPos.x, this.startPos.y, 2);
+        this.clearArea(this.endPos.x, this.endPos.y, 2);
     }
 
     clearArea(centerX, centerY, radius) {
@@ -290,18 +294,18 @@ export class MazeGenerator {
 
     ensureEndReachable() {
         const visited = Array(this.height).fill().map(() => Array(this.width).fill(false));
-        
+
         const hasPath = (x, y) => {
             if (x === this.endPos.x && y === this.endPos.y) return true;
             if (!this.isValid(x, y) || this.maze[y][x] === 1 || visited[y][x]) return false;
-            
+
             visited[y][x] = true;
-            const directions = [[0,1], [1,0], [0,-1], [-1,0]];
-            
+            const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+
             for (const [dx, dy] of directions) {
                 if (hasPath(x + dx, y + dy)) return true;
             }
-            
+
             return false;
         };
         if(this.specialRooms.length != 0)
@@ -398,29 +402,26 @@ export class MazeGenerator {
     findShortestPath(start, end) {
         const queue = [[start]];
         const visited = new Set();
-        
+
         while (queue.length > 0) {
             const path = queue.shift();
-            const {x, y} = path[path.length - 1];
-            
-            if (x === end.x && y === end.y) {
-                return path;
-            }
-            
-            const directions = [[0,1], [1,0], [0,-1], [-1,0]];
+            const { x, y } = path[path.length - 1];
+
+            if (x === end.x && y === end.y) return path;
+
+            const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
             for (const [dx, dy] of directions) {
                 const newX = x + dx;
                 const newY = y + dy;
                 const key = `${newX},${newY}`;
-                
+
                 if (this.isValid(newX, newY) && !visited.has(key)) {
                     visited.add(key);
-                    const newPath = [...path, {x: newX, y: newY}];
-                    queue.push(newPath);
+                    queue.push([...path, { x: newX, y: newY }]);
                 }
             }
         }
-        
+
         return null;
     }
 
@@ -431,13 +432,21 @@ export class MazeGenerator {
     createMazeGeometry() {
         var group = new THREE.Group();
 
-const floorTexture = new THREE.TextureLoader().load('textures/floor.png'); // Load the floor texture
-const floorMaterial = new THREE.MeshStandardMaterial({
-    map: floorTexture, // Use the texture instead of a solid color
-    roughness: 0.9,
-    metalness: 0.1,
-    side: THREE.DoubleSide
-});
+
+         textureLoader = new THREE.TextureLoader();
+        const floorColor = textureLoader.load('textures/f3.jpg');
+        const floorNormal = textureLoader.load('textures/f2.png');
+        const floorRoughness = textureLoader.load('textures/roughness.png');
+        const floormetalness = textureLoader.load('textures/fc.png');
+
+        const floorMaterial = new THREE.MeshStandardMaterial({
+            map: floorColor,
+            roughnessMap: floorRoughness,
+            normalMap: floorNormal,
+            roughness: 1.0,
+            metalness: 0.5
+        });
+
 
 const floorGeometry = new THREE.PlaneGeometry(
     this.width * this.cellSize,
@@ -471,6 +480,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
             emissive: 0x2ECC71,
             emissiveIntensity: 0.2
         });
+
         const endMaterial = new THREE.MeshStandardMaterial({
             color: 0xE74C3C,
             roughness: 0.4,
@@ -586,6 +596,12 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         y * this.cellSize
                     );
                     group.add(endMarker);
+
+                  
+                    setTimeout(() => {
+                        endMarker.scale.y = 1000;
+                        endMarker.position.y = 0.05 + (0.1 * 1000) / 2;
+                    }, 10000);
                 }
                 }
             }
@@ -610,4 +626,4 @@ const wallMaterial = new THREE.MeshStandardMaterial({
             }
         };
     }
-} 
+}

@@ -116,7 +116,6 @@ export class Player {
     }
 
     update() {
-
         this.velocity.y -= this.gravity;
         
         this.raycaster.set(this.camera.position, this.groundCheckRay);
@@ -158,7 +157,6 @@ export class Player {
 
         if (this.moveDirection.lengthSq() > 0) {
             this.moveDirection.normalize();
-
             const nextPosition = this.camera.position.clone();
             nextPosition.addScaledVector(this.moveDirection, this.moveSpeed);
 

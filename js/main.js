@@ -21,6 +21,7 @@ class Game {
             1000
         );
         this.camera.position.y = 1.6;
+
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
@@ -39,7 +40,6 @@ class Game {
         this.gameUI = new GameUI();
 
         this.setupEventListeners();
-
 
         this.animate();
 
