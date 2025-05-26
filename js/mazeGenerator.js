@@ -433,7 +433,7 @@ export class MazeGenerator {
         var group = new THREE.Group();
 
 
-         textureLoader = new THREE.TextureLoader();
+         var textureLoader = new THREE.TextureLoader();
         const floorColor = textureLoader.load('textures/f3.jpg');
         const floorNormal = textureLoader.load('textures/f2.png');
         const floorRoughness = textureLoader.load('textures/roughness.png');
@@ -444,7 +444,8 @@ export class MazeGenerator {
             roughnessMap: floorRoughness,
             normalMap: floorNormal,
             roughness: 1.0,
-            metalness: 0.5
+            metalness: 0.5,
+            side: THREE.DoubleSide 
         });
 
 
@@ -454,6 +455,7 @@ const floorGeometry = new THREE.PlaneGeometry(
 );
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2;
+//floor.side = THREE.DoubleSide;
 floor.position.set(
     (this.width * this.cellSize) / 2 - this.cellSize / 2,
     0.01 + (this.mazeLevels.length * this.wallHeight) - this.wallHeight/2,
