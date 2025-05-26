@@ -102,7 +102,11 @@ export class Player {
             
             if (intersects.length > 0) {
                 const distance = intersects[0].distance;
-                if (distance < this.playerRadius) {
+                if(intersects[0].object.name == "endMarker")          
+                {
+                   // console.log("WE FOUND THE END");
+                }
+                else if (distance < this.playerRadius) {
                     collision = true;
                     minDistance = Math.min(minDistance, distance);
                 }

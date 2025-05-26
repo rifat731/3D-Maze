@@ -597,6 +597,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         0.03 + ((this.mazeLevels.length) * this.wallHeight) - this.wallHeight / 2,
                         y * this.cellSize
                     );
+                        endMarker.name = "endMarker";
                     group.add(endMarker);
 
                   
