@@ -22,8 +22,9 @@ class Game {
         );
         this.camera.position.y = 1.6;
 
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, stencil:true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.localClippingEnabled = true;
         this.renderer.shadowMap.enabled = true;
         document.body.appendChild(this.renderer.domElement);
 

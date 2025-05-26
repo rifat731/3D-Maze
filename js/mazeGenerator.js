@@ -75,7 +75,11 @@ export class MazeGenerator {
             z: this.ends[this.ends.length - 1].z 
         };
 
-        this.starts.push(tempStartPos);
+        this.starts.push(
+            {x: tempStartPos.x,
+            y: tempStartPos.y,
+            z: tempStartPos.z
+    });
         let maxDistance = 0;
         let bestEndPos = null;
 
@@ -431,24 +435,58 @@ export class MazeGenerator {
 
     createMazeGeometry() {
         var group = new THREE.Group();
+        var floorMaterial = new THREE.MeshStandardMaterial();
+        var e = this.starts[this.starts.length -1];
+        if(this.mazeLevels.length > 0)
+        {
+        const stencilMaterial = new THREE.MeshBasicMaterial({
+            colorWrite: false,   
+            depthWrite: true,  
+            depthTest: true,  
+            stencilWrite: true,   
+            stencilRef: 1,        
+            stencilFunc: THREE.AlwaysStencilFunc, 
+            stencilFail: THREE.KeepStencilOp,
+            stencilZFail: THREE.KeepStencilOp,
+            stencilZPass: THREE.ReplaceStencilOp  
+        });
 
-
-         var textureLoader = new THREE.TextureLoader();
+        const stencilBox = new THREE.Mesh(
+            new THREE.BoxGeometry(this.cellSize * 3, 0.1, this.cellSize*3),
+            stencilMaterial
+        );
+        stencilBox.position.set(
+            e.x * this.cellSize,
+            (this.mazeLevels.length * this.wallHeight) - this.wallHeight / 2,
+            e.y * this.cellSize
+        );
+        stencilBox.renderOrder = 0;
+        stencilBox.name == "clipBox";
+        this.scene.add(stencilBox);
+    }
+        var textureLoader = new THREE.TextureLoader();
         const floorColor = textureLoader.load('textures/f3.jpg');
         const floorNormal = textureLoader.load('textures/f2.png');
         const floorRoughness = textureLoader.load('textures/roughness.png');
         const floormetalness = textureLoader.load('textures/fc.png');
 
-        const floorMaterial = new THREE.MeshStandardMaterial({
+         floorMaterial = new THREE.MeshStandardMaterial({
             map: floorColor,
             roughnessMap: floorRoughness,
             normalMap: floorNormal,
             roughness: 1.0,
             metalness: 0.5,
-            side: THREE.DoubleSide 
+            side: THREE.DoubleSide
         });
+       
 
 
+floorMaterial.stencilWrite = true;
+floorMaterial.stencilFunc = THREE.NotEqualStencilFunc;
+floorMaterial.stencilRef = 1;
+floorMaterial.stencilFail = THREE.KeepStencilOp;
+floorMaterial.stencilZFail = THREE.KeepStencilOp;
+floorMaterial.stencilZPass = THREE.KeepStencilOp;
 const floorGeometry = new THREE.PlaneGeometry(
     this.width * this.cellSize,
     this.height * this.cellSize
@@ -461,6 +499,7 @@ floor.position.set(
     0.01 + (this.mazeLevels.length * this.wallHeight) - this.wallHeight/2,
     (this.height * this.cellSize) / 2 - this.cellSize / 2
 );
+
 group.add(floor);
 
 
@@ -473,6 +512,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
     metalness: 0.2,
     side: THREE.DoubleSide 
 });
+
 
 
         const startMaterial = new THREE.MeshStandardMaterial({

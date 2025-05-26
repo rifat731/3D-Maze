@@ -102,7 +102,7 @@ export class Player {
             
             if (intersects.length > 0) {
                 const distance = intersects[0].distance;
-                if(intersects[0].object.name == "endMarker")          
+                if (intersects[0].object.name == "endMarker" || intersects[0].object.name == "clipBox")          
                 {
                    // console.log("WE FOUND THE END");
                 }
