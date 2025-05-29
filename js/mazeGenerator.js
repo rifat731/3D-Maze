@@ -20,6 +20,7 @@ export class MazeGenerator {
         this.starts = [];
         this.ends = [];
         this.generateStartAndEnd();
+        this.stencilBoxes = [];
     }
 
     generateStartAndEnd() {
@@ -434,6 +435,7 @@ export class MazeGenerator {
     }
 
     createMazeGeometry() {
+        var stencilRefNumber = 1 + this.mazeLevels.length;
         var group = new THREE.Group();
         var floorMaterial = new THREE.MeshStandardMaterial();
         var e = this.starts[this.starts.length -1];
@@ -441,13 +443,14 @@ export class MazeGenerator {
         {
         const stencilMaterial = new THREE.MeshBasicMaterial({
             colorWrite: false,   
-            depthWrite: true,  
+            depthWrite: false,  
             depthTest: true,  
             stencilWrite: true,   
-            stencilRef: 1,        
+            stencilRef: stencilRefNumber,        
             stencilFunc: THREE.AlwaysStencilFunc, 
             stencilFail: THREE.KeepStencilOp,
             stencilZFail: THREE.KeepStencilOp,
+            side: THREE.DoubleSide,
             stencilZPass: THREE.ReplaceStencilOp  
         });
 
@@ -457,12 +460,14 @@ export class MazeGenerator {
         );
         stencilBox.position.set(
             e.x * this.cellSize,
-            (this.mazeLevels.length * this.wallHeight) - this.wallHeight / 2,
+            ((this.mazeLevels.length * this.wallHeight) - this.wallHeight / 2),
             e.y * this.cellSize
         );
         stencilBox.renderOrder = 0;
-        stencilBox.name == "clipBox";
+        stencilBox.name = "clipBox";
+        //console.log(stencilBox.name);
         this.scene.add(stencilBox);
+        group.add(stencilBox);
     }
         var textureLoader = new THREE.TextureLoader();
         const floorColor = textureLoader.load('textures/f3.jpg');
@@ -483,7 +488,7 @@ export class MazeGenerator {
 
 floorMaterial.stencilWrite = true;
 floorMaterial.stencilFunc = THREE.NotEqualStencilFunc;
-floorMaterial.stencilRef = 1;
+floorMaterial.stencilRef = stencilRefNumber;
 floorMaterial.stencilFail = THREE.KeepStencilOp;
 floorMaterial.stencilZFail = THREE.KeepStencilOp;
 floorMaterial.stencilZPass = THREE.KeepStencilOp;
@@ -611,7 +616,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                 } else if (x === this.endPos.x && y === this.endPos.y) {
                     if (this.canGoUp == true && this.mazeLevels.length != this.amountOfLevels - 1)
                     {
-                        const wallGeometry = new THREE.BoxGeometry(
+                       /* const wallGeometry = new THREE.BoxGeometry(
                             this.cellSize,
                             this.wallHeight,
                             this.cellSize
@@ -624,7 +629,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         );
                         wall.scale.set(1,2,1);
                         wall.rotation.set(45,0,0);
-                        walls.add(wall);
+                        walls.add(wall);*/
                     }
                     else
                     {
@@ -649,6 +654,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                 }
             }
         }
+        
         group.add(walls);
         this.scene.add(group);
         console.log(group);

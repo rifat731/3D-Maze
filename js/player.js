@@ -102,7 +102,10 @@ export class Player {
             
             if (intersects.length > 0) {
                 const distance = intersects[0].distance;
-                if (intersects[0].object.name == "endMarker" || intersects[0].object.name == "clipBox")          
+                //console.log(intersects.length);
+                //console.log(intersects[0].object.name);
+                
+                if (intersects[0].object.name == "endMarker" || intersects[0].object.name === "clipBox")          
                 {
                    // console.log("WE FOUND THE END");
                 }
@@ -124,18 +127,33 @@ export class Player {
         
         this.raycaster.set(this.camera.position, this.groundCheckRay);
         const intersects = this.raycaster.intersectObjects(this.scene.children, true);
-        
-        if (intersects.length > 0 && intersects[0].distance < this.playerHeight) {
+        var ignorefall = false;
+        for (var i = 0; i < intersects.length; i++) {
+            if (intersects[i].object.name === "clipBox" && intersects[i].distance < this.playerHeight) {
+                console.log("HEOIHWFGOIHWEG");
+                ignorefall = true;
+                // break;
+            }
+        }
+        if (intersects.length > 0 && intersects[0].distance < this.playerHeight && !ignorefall) {
             if (this.velocity.y < 0) {
                 this.velocity.y = 0;
                 this.camera.position.y = intersects[0].point.y + this.playerHeight;
-                console.log("We sjould now be taller");
+               // console.log("We sjould now be taller");
                 this.canJump = true;
             }
         }
         this.raycaster2.set(this.camera.position, this.roofCheckRay);
         const intersects2 = this.raycaster2.intersectObjects(this.scene.children, true);
-        if (intersects2.length > 0 && intersects2[0].distance < this.playerHeight) {
+        var ignoreCollision =  false;
+        for (var i = 0; i < intersects2.length; i++) {
+            if (intersects2[i].object.name === "clipBox" && intersects2[i].distance < this.playerHeight) {
+                console.log("HEOIHWFGOIHWEG");
+                ignoreCollision = true;
+               // break;
+            }
+            }
+         if (intersects2.length > 0 && intersects2[0].distance < this.playerHeight && !ignoreCollision) {
             if (this.velocity.y > 0) {
                 this.velocity.y = 0;
                 console.log("you hit your head");
