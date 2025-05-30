@@ -29,9 +29,9 @@ export class Player {
         this.raycaster2 = new THREE.Raycaster();
         this.groundCheckRay = new THREE.Vector3(0, -1, 0);
         this.roofCheckRay = new THREE.Vector3(0,1,0);
-        this.camera.add(this.groundCheckRay);
-        this.camera.add(this.roofCheckRay);
-        this.camera.add(this.raycaster);
+        //this.camera.add(this.groundCheckRay);
+        //this.camera.add(this.roofCheckRay);
+       // this.camera.add(this.raycaster);
     }
 
     handleKeyDown(event) {

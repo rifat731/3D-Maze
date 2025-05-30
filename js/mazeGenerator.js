@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 
 export class MazeGenerator {
-    constructor(width, height, scene) {
+    constructor(width, height, scene, amountOfLevels, clip) {
         this.width = width;
         this.height = height;
         this.cellSize = 5;
@@ -13,7 +13,7 @@ export class MazeGenerator {
         this.visited = Array(height).fill().map(() => Array(width).fill(false));
         this.specialRooms = [];
         this.mazeLevels = [];
-        this.amountOfLevels =5;
+        this.amountOfLevels = amountOfLevels;
         this.roomSizes = Math.floor(height/4);
         this.canGoUp = true;
         this.scene = scene;
@@ -21,6 +21,7 @@ export class MazeGenerator {
         this.ends = [];
         this.generateStartAndEnd();
         this.stencilBoxes = [];
+        this.clipPlane = clip;
     }
 
     generateStartAndEnd() {
@@ -479,6 +480,7 @@ export class MazeGenerator {
             map: floorColor,
             roughnessMap: floorRoughness,
             normalMap: floorNormal,
+            clippingPlanes: [this.clipPlane],
             roughness: 1.0,
             metalness: 0.5,
             side: THREE.DoubleSide
@@ -498,13 +500,14 @@ const floorGeometry = new THREE.PlaneGeometry(
 );
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2;
+floor.name = "Floor";
 //floor.side = THREE.DoubleSide;
 floor.position.set(
     (this.width * this.cellSize) / 2 - this.cellSize / 2,
     0.01 + (this.mazeLevels.length * this.wallHeight) - this.wallHeight/2,
     (this.height * this.cellSize) / 2 - this.cellSize / 2
 );
-
+// .*\.visable = false;
 group.add(floor);
 
 
@@ -515,6 +518,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
     map: wallTexture, // Use the texture instead of a solid color
     roughness: 0.7,
     metalness: 0.2,
+    clippingPlanes: [this.clipPlane],
     side: THREE.DoubleSide 
 });
 
@@ -525,6 +529,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
             roughness: 0.4,
             metalness: 0.6,
             emissive: 0x2ECC71,
+            clippingPlanes: [this.clipPlane],
             emissiveIntensity: 0.2
         });
 
@@ -533,6 +538,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
             roughness: 0.4,
             metalness: 0.6,
             emissive: 0xE74C3C,
+            clippingPlanes: [this.clipPlane],
             emissiveIntensity: 0.2
         });
 
@@ -551,6 +557,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
+// .*\.visable = false;
                     walls.add(wall);
                     var wall2 = new THREE.Mesh(wallGeometry, wallMaterial);
                     wall2.position.set(
@@ -558,6 +565,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         0.01 +  (this.wallHeight * (this.mazeLevels.length  )),
                         y * this.cellSize
                     );
+// .*\.visable = false;
                     walls.add(wall2);
 
                     const sideGeometry = new THREE.BoxGeometry(
@@ -577,6 +585,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
+// .*\.visable = false;
                     walls.add(leftWall);
 
                     var rightWall = new THREE.Mesh(sideGeometry, wallMaterial);
@@ -585,6 +594,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
+// .*\.visable = false;
                     walls.add(rightWall);
 
                     var frontWall = new THREE.Mesh(frontGeometry, wallMaterial);
@@ -593,6 +603,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize - this.cellSize/2 + this.wallThickness/2
                     );
+// .*\.visable = false;
                     walls.add(frontWall);
 
                     var backWall = new THREE.Mesh(frontGeometry, wallMaterial);
@@ -601,6 +612,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize + this.cellSize/2 - this.wallThickness/2
                     );
+// .*\.visable = false;
                     walls.add(backWall);
                 } else if (x === this.startPos.x && y === this.startPos.y && this.mazeLevels.length === 1)  {
                     const startMarker = new THREE.Mesh(
@@ -645,17 +657,20 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         endMarker.name = "endMarker";
                     group.add(endMarker);
 
-                  
+                    if(this.amountOfLevels == 1)
+                    {
                     setTimeout(() => {
                         endMarker.scale.y = 1000;
                         endMarker.position.y = 0.05 + (0.1 * 1000) / 2;
                     }, 10000);
+                    }
                 }
                 }
             }
         }
         
         group.add(walls);
+// .*\.visable = false;
         this.scene.add(group);
         console.log(group);
         return group;
