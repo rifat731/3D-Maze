@@ -542,39 +542,39 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                 if (this.maze[y][x] === 1) {
                     const wallGeometry = new THREE.BoxGeometry(
                         this.cellSize,
-                        this.wallHeight,
+                        this.wallHeight-0.01,
                         this.cellSize
                     );
                     var wall = new THREE.Mesh(wallGeometry, wallMaterial);
                     wall.position.set(
                         x * this.cellSize,
-                        (this.wallHeight * (this.mazeLevels.length )),
+                        0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
                     walls.add(wall);
                     var wall2 = new THREE.Mesh(wallGeometry, wallMaterial);
                     wall2.position.set(
                         x * this.cellSize,
-                        (this.wallHeight * (this.mazeLevels.length  )),
+                        0.01 +  (this.wallHeight * (this.mazeLevels.length  )),
                         y * this.cellSize
                     );
                     walls.add(wall2);
 
                     const sideGeometry = new THREE.BoxGeometry(
                         this.wallThickness,
-                        this.wallHeight,
+                        this.wallHeight-0.01,
                         this.cellSize
                     );
                     const frontGeometry = new THREE.BoxGeometry(
                         this.cellSize,
-                        this.wallHeight,
+                        this.wallHeight-0.01,
                         this.wallThickness
                     );
 
                     var leftWall = new THREE.Mesh(sideGeometry, wallMaterial);
                     leftWall.position.set(
                         x * this.cellSize - this.cellSize/2 + this.wallThickness/2,
-                        (this.wallHeight * (this.mazeLevels.length )),
+                        0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
                     walls.add(leftWall);
@@ -582,7 +582,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                     var rightWall = new THREE.Mesh(sideGeometry, wallMaterial);
                     rightWall.position.set(
                         x * this.cellSize + this.cellSize/2 - this.wallThickness/2,
-                        (this.wallHeight * (this.mazeLevels.length )),
+                        0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
                     walls.add(rightWall);
@@ -590,7 +590,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                     var frontWall = new THREE.Mesh(frontGeometry, wallMaterial);
                     frontWall.position.set(
                         x * this.cellSize,
-                        (this.wallHeight * (this.mazeLevels.length )),
+                        0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize - this.cellSize/2 + this.wallThickness/2
                     );
                     walls.add(frontWall);
@@ -598,7 +598,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                     var backWall = new THREE.Mesh(frontGeometry, wallMaterial);
                     backWall.position.set(
                         x * this.cellSize,
-                        (this.wallHeight * (this.mazeLevels.length )),
+                        0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize + this.cellSize/2 - this.wallThickness/2
                     );
                     walls.add(backWall);
@@ -609,7 +609,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                     );
                     startMarker.position.set(
                         x* this.cellSize,
-                        0.03 + ((this.mazeLevels.length - 1) * this.wallHeight) - this.wallHeight / 2,
+                        0.02 + ((this.mazeLevels.length - 1) * this.wallHeight) - this.wallHeight / 2,
                         y* this.cellSize
                     );
                     group.add(startMarker);
