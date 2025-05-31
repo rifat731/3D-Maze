@@ -13,7 +13,7 @@ class Game {
         this.clipPlane;
         this.clipPlane2;
         this.frameCount = 0;
-        this.frameINterval =  100;
+        this.frameINterval =  30;
         this.previousDirection = new THREE.Vector3();
 
     }
@@ -85,7 +85,7 @@ class Game {
         this.mazeGenerator = new MazeGenerator(mazeSize, mazeSize, this.scene, this.amountOfFloors, this.clipPlane);
         
         this.maze = this.mazeGenerator.generate();
-        this.player.maxJumpHeight = this.mazeGenerator.amountOfLevels * this.mazeGenerator.wallHeight;
+        this.player.maxJumpHeight = (this.mazeGenerator.amountOfLevels * this.mazeGenerator.wallHeight) - this.player.playerHeight* 2.5;
 
         const { start } = this.mazeGenerator.getStartAndEnd();
 
@@ -137,11 +137,17 @@ class Game {
                 else if (intersectser[0].object.name == "MoreFloors") {
                     this.gameUI.MoreFloorsButton();
                 }
+                else if (intersectser[0].object.name == "Resume")
+                {
+                    if (!this.controls.isLocked) {
+                        this.controls.lock();
+                    }
+                }
             }
             
-            else if (!this.controls.isLocked) {
+           /* else if (!this.controls.isLocked) {
                 this.controls.lock();
-            }
+            }*/
         }
         );
 
@@ -249,7 +255,14 @@ class Game {
                         const distance = this.camera.position.distanceTo(object.position);
                         const toObject = new THREE.Vector3().subVectors(object.position, this.camera.position).normalize();
                         const dot = camDirection.dot(toObject);
-                        if(dot < 0)
+                        const playerY = new THREE.Vector3(0,this.camera.position.y,0);
+                        const objectY = new THREE.Vector3(0,object.position.y,0);
+                        const ydistance = playerY.distanceTo(objectY);
+                        if(ydistance > 15)
+                        {
+                            object.visible = false;
+                        }
+                        else if(dot < 0)
                         {
                             if(distance > 30)
                             {
