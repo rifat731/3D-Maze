@@ -335,6 +335,7 @@ export class MazeGenerator {
                         0.05,
                         y * this.cellSize
                     );
+                    
                     group.add(endMarker);
 
                   
@@ -364,4 +365,4 @@ export class MazeGenerator {
             }
         };
     }
-
+}
