@@ -112,6 +112,11 @@ class Game {
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
+            this.uiCamera.left = window.innerWidth / -2;
+            this.uiCamera.right = window.innerWidth / 2;
+            this.uiCamera.top = window.innerHeight / 2;
+            this.uiCamera.bottom = window.innerHeight / -2;
+            this.uiCamera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
         });
         const raycasterer = new THREE.Raycaster();
@@ -245,7 +250,7 @@ class Game {
 
 
             if (angle > 0.05) {
-                console.log('Sudden camera turn detected!');
+                //console.log('Sudden camera turn detected!');
                 this.frameCount = this.frameINterval;
             }
             this.previousDirection.copy(camDirection);
@@ -258,9 +263,11 @@ class Game {
                         const playerY = new THREE.Vector3(0,this.camera.position.y,0);
                         const objectY = new THREE.Vector3(0,object.position.y,0);
                         const ydistance = playerY.distanceTo(objectY);
-                        if(ydistance > 15)
+                        //console.log(ydistance);
+                        if(ydistance > 15 )
                         {
                             object.visible = false;
+                          // console.log("WEHWIEHIWD disabled vased on height");
                         }
                         else if(dot < 0)
                         {

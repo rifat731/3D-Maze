@@ -130,7 +130,7 @@ export class Player {
         var ignorefall = false;
         for (var i = 0; i < intersects.length; i++) {
             if (intersects[i].object.name === "clipBox" && intersects[i].distance < this.playerHeight) {
-                console.log("HEOIHWFGOIHWEG");
+             //   console.log("HEOIHWFGOIHWEG");
                 ignorefall = true;
                 // break;
             }
@@ -148,7 +148,7 @@ export class Player {
         var ignoreCollision =  false;
         for (var i = 0; i < intersects2.length; i++) {
             if (intersects2[i].object.name === "clipBox" && intersects2[i].distance < this.playerHeight) {
-                console.log("HEOIHWFGOIHWEG");
+              //  console.log("HEOIHWFGOIHWEG");
                 ignoreCollision = true;
                // break;
             }
@@ -156,7 +156,7 @@ export class Player {
          if (intersects2.length > 0 && intersects2[0].distance < this.playerHeight && !ignoreCollision) {
             if (this.velocity.y > 0) {
                 this.velocity.y = 0;
-                console.log("you hit your head");
+             //   console.log("you hit your head");
             }
         }
 
