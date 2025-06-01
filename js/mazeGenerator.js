@@ -544,78 +544,79 @@ const wallMaterial = new THREE.MeshStandardMaterial({
             emissiveIntensity: 0.2
         });
 
-        const wallGeometry = new THREE.BoxGeometry(
-            this.cellSize,
-            this.wallHeight,
-            this.cellSize
-        );
-        const sideGeometry = new THREE.BoxGeometry(
-            this.wallThickness,
-            this.wallHeight,
-            this.cellSize
-        );
-        const frontGeometry = new THREE.BoxGeometry(
-            this.cellSize,
-            this.wallHeight,
-            this.wallThickness
-        );
-
-        const wallInstances = new THREE.InstancedMesh(wallGeometry, wallMaterial, this.width * this.height * 4);
-        const sideInstances = new THREE.InstancedMesh(sideGeometry, wallMaterial, this.width * this.height * 2);
-        const frontInstances = new THREE.InstancedMesh(frontGeometry, wallMaterial, this.width * this.height * 2);
-
-        let wallCount = 0;
-        let sideCount = 0;
-        let frontCount = 0;
-
-        const matrix = new THREE.Matrix4();
-        const position = new THREE.Vector3();
-        const quaternion = new THREE.Quaternion();
-        const scale = new THREE.Vector3(1, 1, 1);
-
+        var walls = new THREE.Group();
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 if (this.maze[y][x] === 1) {
-                    position.set(
+                    const wallGeometry = new THREE.BoxGeometry(
+                        this.cellSize,
+                        this.wallHeight-0.01,
+                        this.cellSize
+                    );
+                    var wall = new THREE.Mesh(wallGeometry, wallMaterial);
+                    wall.position.set(
                         x * this.cellSize,
                         0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
-                    matrix.compose(position, quaternion, scale);
-                    wallInstances.setMatrixAt(wallCount++, matrix);
+wall.visable = false;
+                    walls.add(wall);
+                    var wall2 = new THREE.Mesh(wallGeometry, wallMaterial);
+                    wall2.position.set(
+                        x * this.cellSize,
+                        0.01 +  (this.wallHeight * (this.mazeLevels.length  )),
+                        y * this.cellSize
+                    );
+wall2.visable = false;
+                    walls.add(wall2);
 
-                    position.set(
+                    const sideGeometry = new THREE.BoxGeometry(
+                        this.wallThickness,
+                        this.wallHeight-0.01,
+                        this.cellSize
+                    );
+                    const frontGeometry = new THREE.BoxGeometry(
+                        this.cellSize,
+                        this.wallHeight-0.01,
+                        this.wallThickness
+                    );
+
+                    var leftWall = new THREE.Mesh(sideGeometry, wallMaterial);
+                    leftWall.position.set(
                         x * this.cellSize - this.cellSize/2 + this.wallThickness/2,
-                        this.wallHeight / 2,
+                        0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
-                    matrix.compose(position, quaternion, scale);
-                    sideInstances.setMatrixAt(sideCount++, matrix);
+leftWall.visable = false;
+                    walls.add(leftWall);
 
-                    position.set(
+                    var rightWall = new THREE.Mesh(sideGeometry, wallMaterial);
+                    rightWall.position.set(
                         x * this.cellSize + this.cellSize/2 - this.wallThickness/2,
-                        this.wallHeight / 2,
+                        0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
-                    matrix.compose(position, quaternion, scale);
-                    sideInstances.setMatrixAt(sideCount++, matrix);
+rightWall.visable = false;
+                    walls.add(rightWall);
 
-                    position.set(
+                    var frontWall = new THREE.Mesh(frontGeometry, wallMaterial);
+                    frontWall.position.set(
                         x * this.cellSize,
                         0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize - this.cellSize/2 + this.wallThickness/2
                     );
-                    matrix.compose(position, quaternion, scale);
-                    frontInstances.setMatrixAt(frontCount++, matrix);
+frontWall.visable = false;
+                    walls.add(frontWall);
 
-                    position.set(
+                    var backWall = new THREE.Mesh(frontGeometry, wallMaterial);
+                    backWall.position.set(
                         x * this.cellSize,
                         0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize + this.cellSize/2 - this.wallThickness/2
                     );
-                    matrix.compose(position, quaternion, scale);
-                    frontInstances.setMatrixAt(frontCount++, matrix);
-                } else if (x === this.startPos.x && y === this.startPos.y) {
+backWall.visable = false;
+                    walls.add(backWall);
+                } else if (x === this.startPos.x && y === this.startPos.y && this.mazeLevels.length === 1)  {
                     const startMarker = new THREE.Mesh(
                         new THREE.BoxGeometry(this.cellSize, 0.1, this.cellSize),
                         startMaterial
@@ -625,7 +626,6 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         0.02 + ((this.mazeLevels.length - 1) * this.wallHeight) - this.wallHeight / 2,
                         y* this.cellSize
                     );
-                    startMarker.frustumCulled = true;
                     group.add(startMarker);
                 } else if (x === this.endPos.x && y === this.endPos.y) {
                     if (this.canGoUp == true && this.mazeLevels.length != this.amountOfLevels - 1)
@@ -657,7 +657,6 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         y * this.cellSize
                     );
                         endMarker.name = "endMarker";
-                    endMarker.frustumCulled = true;
                     group.add(endMarker);
 
                     if(this.amountOfLevels == 1)
@@ -671,19 +670,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                 }
             }
         }
-
-        wallInstances.count = wallCount;
-        sideInstances.count = sideCount;
-        frontInstances.count = frontCount;
-
-        wallInstances.frustumCulled = true;
-        sideInstances.frustumCulled = true;
-        frontInstances.frustumCulled = true;
-
-        group.add(wallInstances);
-        group.add(sideInstances);
-        group.add(frontInstances);
-
+        
         group.add(walls);
         this.scene.add(group);
         console.log(group);
@@ -705,4 +692,3 @@ const wallMaterial = new THREE.MeshStandardMaterial({
         };
     }
 }
-
