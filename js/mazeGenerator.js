@@ -670,25 +670,8 @@ backWall.visable = false;
                 }
             }
         }
-<<<<<<< HEAD
-
-        wallInstances.count = wallCount;
-        sideInstances.count = sideCount;
-        frontInstances.count = frontCount;
-
-        wallInstances.frustumCulled = true;
-        sideInstances.frustumCulled = true;
-        frontInstances.frustumCulled = true;
-
-        group.add(wallInstances);
-        group.add(sideInstances);
-        group.add(frontInstances);
-
-        //group.add(walls);
-=======
         
         group.add(walls);
->>>>>>> parent of 98269fc (Reapply "Merge branch 'main' into MatthewBaird")
         this.scene.add(group);
         console.log(group);
         return group;
