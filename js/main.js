@@ -256,7 +256,21 @@ class Game {
             this.previousDirection.copy(camDirection);
             if (this.frameCount % this.frameINterval === 0) {
                 this.scene.traverse((object) => {
-                    if (object.isMesh && object.name != "endMarker" && object.name != "Floor") {
+                    if(object.name == "Floor")
+                    {
+                        const playerY = new THREE.Vector3(0, this.camera.position.y, 0);
+                        const objectY = new THREE.Vector3(0, object.position.y, 0);
+                        const ydistance = playerY.distanceTo(objectY);
+                        if(ydistance > 20)
+                        {
+                            object.visible = false;
+                        }
+                        else
+                        {
+                            object.visible = true;
+                        }
+                    }
+                    else if (object.isMesh && object.name != "endMarker") {
                         const distance = this.camera.position.distanceTo(object.position);
                         const toObject = new THREE.Vector3().subVectors(object.position, this.camera.position).normalize();
                         const dot = camDirection.dot(toObject);
