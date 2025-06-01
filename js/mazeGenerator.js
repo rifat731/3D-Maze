@@ -557,7 +557,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
-// .*\.visable = false;
+wall.visable = false;
                     walls.add(wall);
                     var wall2 = new THREE.Mesh(wallGeometry, wallMaterial);
                     wall2.position.set(
@@ -565,7 +565,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         0.01 +  (this.wallHeight * (this.mazeLevels.length  )),
                         y * this.cellSize
                     );
-// .*\.visable = false;
+wall2.visable = false;
                     walls.add(wall2);
 
                     const sideGeometry = new THREE.BoxGeometry(
@@ -585,7 +585,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
-// .*\.visable = false;
+leftWall.visable = false;
                     walls.add(leftWall);
 
                     var rightWall = new THREE.Mesh(sideGeometry, wallMaterial);
@@ -594,7 +594,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize
                     );
-// .*\.visable = false;
+rightWall.visable = false;
                     walls.add(rightWall);
 
                     var frontWall = new THREE.Mesh(frontGeometry, wallMaterial);
@@ -603,7 +603,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize - this.cellSize/2 + this.wallThickness/2
                     );
-// .*\.visable = false;
+frontWall.visable = false;
                     walls.add(frontWall);
 
                     var backWall = new THREE.Mesh(frontGeometry, wallMaterial);
@@ -612,7 +612,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                         0.01 + (this.wallHeight * (this.mazeLevels.length )),
                         y * this.cellSize + this.cellSize/2 - this.wallThickness/2
                     );
-// .*\.visable = false;
+backWall.visable = false;
                     walls.add(backWall);
                 } else if (x === this.startPos.x && y === this.startPos.y && this.mazeLevels.length === 1)  {
                     const startMarker = new THREE.Mesh(
@@ -670,7 +670,6 @@ const wallMaterial = new THREE.MeshStandardMaterial({
         }
         
         group.add(walls);
-// .*\.visable = false;
         this.scene.add(group);
         console.log(group);
         return group;
