@@ -24,6 +24,7 @@ export class MazeGenerator {
         this.clipPlane = clip;
     }
 
+    
     generateStartAndEnd() {
         const safeDistance = 2;
         
@@ -512,14 +513,51 @@ group.add(floor);
 
 
  
-const wallTexture = new THREE.TextureLoader().load('textures/wall.png'); // Load the wall texture
+const wallTexture = new THREE.TextureLoader().load('textures/wall.png');
+wallTexture.wrapS = THREE.RepeatWrapping;
+wallTexture.wrapT = THREE.RepeatWrapping;
 
-const wallMaterial = new THREE.MeshStandardMaterial({
-    map: wallTexture, // Use the texture instead of a solid color
-    roughness: 0.7,
-    metalness: 0.2,
-    clippingPlanes: [this.clipPlane],
-    side: THREE.DoubleSide 
+const wallMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+        baseTexture: { value: wallTexture },
+        lightDirection: { value: new THREE.Vector3(0.5, 1, 0.5).normalize() },
+        lightColor: { value: new THREE.Color(0xffffff) },
+    },
+    vertexShader: `
+        varying vec3 vNormal;
+        varying vec2 vUv;
+
+        void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vUv = uv;
+
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+      uniform sampler2D baseTexture;
+uniform vec3 lightDirection;
+uniform vec3 lightColor;
+
+varying vec3 vNormal;
+varying vec2 vUv;
+
+void main() {
+    float lambert = max(dot(vNormal, lightDirection), 0.0);
+    lambert = pow(lambert, 0.5);
+    float ambient = 0.4;
+    float lighting = ambient + (1.0 - ambient) * lambert;
+
+    vec4 texColor = texture2D(baseTexture, vUv);
+    vec3 color = texColor.rgb * lightColor * lighting;
+
+    gl_FragColor = vec4(color, texColor.a);
+}
+
+    `,
+    side: THREE.DoubleSide,
+    clippingPlanes: [this.clipPlane], // <-- Pass clipping plane here
+    clipShadows: true,
 });
 
 
