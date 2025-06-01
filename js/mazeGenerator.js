@@ -684,7 +684,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
         group.add(sideInstances);
         group.add(frontInstances);
 
-        group.add(walls);
+        //group.add(walls);
         this.scene.add(group);
         console.log(group);
         return group;
