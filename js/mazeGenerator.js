@@ -1,5 +1,3 @@
-
-
 import * as THREE from 'three';
 
 export class MazeGenerator {
@@ -514,14 +512,64 @@ group.add(floor);
 
 
  
-const wallTexture = new THREE.TextureLoader().load('textures/wall.png'); // Load the wall texture
+const wallTexture = new THREE.TextureLoader().load('textures/wall.png');
+wallTexture.wrapS = THREE.RepeatWrapping;
+wallTexture.wrapT = THREE.RepeatWrapping;
 
-const wallMaterial = new THREE.MeshStandardMaterial({
-    map: wallTexture, // Use the texture instead of a solid color
-    roughness: 0.7,
-    metalness: 0.2,
-    clippingPlanes: [this.clipPlane],
-    side: THREE.DoubleSide 
+const wallMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    baseTexture: { value: wallTexture }, 
+    lightDirection: { value: new THREE.Vector3(1, 1, 1).normalize() },
+    lightColor: { value: new THREE.Color(1, 1, 1) },
+    ...THREE.UniformsLib.fog 
+  },
+  vertexShader: `
+    varying vec3 vNormal;
+    varying vec2 vUv;
+    varying float vFogDepth;
+
+    void main() {
+        vNormal = normalize(normalMatrix * normal);
+        vUv = uv;
+
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+        vFogDepth = -mvPosition.z;
+
+        gl_Position = projectionMatrix * mvPosition;
+    }
+  `,
+  fragmentShader: `
+    uniform sampler2D baseTexture;
+    uniform vec3 lightDirection;
+    uniform vec3 lightColor;
+
+    uniform vec3 fogColor;
+    uniform float fogNear;
+    uniform float fogFar;
+
+    varying vec3 vNormal;
+    varying vec2 vUv;
+    varying float vFogDepth;
+
+    void main() {
+        float lambert = max(dot(vNormal, lightDirection), 0.0);
+        lambert = pow(lambert, 0.5);
+        float ambient = 0.4;
+        float lighting = ambient + (1.0 - ambient) * lambert;
+
+        vec4 texColor = texture2D(baseTexture, vUv);
+        vec3 litColor = texColor.rgb * lightColor * lighting;
+
+        float fogFactor = smoothstep(fogNear, fogFar, vFogDepth);
+        vec3 finalColor = mix(litColor, fogColor, fogFactor);
+
+        gl_FragColor = vec4(finalColor, texColor.a);
+    }
+  `,
+  side: THREE.DoubleSide,
+  fog: true, // Enables fog integration
+  clippingPlanes: [this.clipPlane],
+  clipShadows: true
 });
 
 
