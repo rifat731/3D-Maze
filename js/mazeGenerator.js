@@ -544,7 +544,8 @@ const wallMaterial = new THREE.MeshStandardMaterial({
             emissiveIntensity: 0.2
         });
 
-        var walls = new THREE.Group();
+        const walls = new THREE.Group();
+
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 if (this.maze[y][x] === 1) {
