@@ -10,6 +10,7 @@ export class GameUI {
         this.buttons = [];
         this.main = null;
         this.levelsText = null;
+        this.fogColorInput = document.getElementById('fog-color');
 
 
     }
@@ -206,4 +207,5 @@ export class GameUI {
     resetTimer() {
         this.startTime = Date.now();
     }
+    
 } 

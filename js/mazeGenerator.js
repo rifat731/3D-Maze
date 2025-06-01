@@ -519,10 +519,10 @@ wallTexture.wrapT = THREE.RepeatWrapping;
 
 const wallMaterial = new THREE.ShaderMaterial({
   uniforms: {
-    baseTexture: { value: wallTexture }, // your wall/floor texture
+    baseTexture: { value: wallTexture }, 
     lightDirection: { value: new THREE.Vector3(1, 1, 1).normalize() },
     lightColor: { value: new THREE.Color(1, 1, 1) },
-    ...THREE.UniformsLib.fog // Inject fog uniforms from the scene
+    ...THREE.UniformsLib.fog 
   },
   vertexShader: `
     varying vec3 vNormal;

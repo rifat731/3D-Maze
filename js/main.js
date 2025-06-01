@@ -4,6 +4,7 @@ import { MazeGenerator } from './mazeGenerator.js';
 import { Player } from './player.js';
 import { GameUI } from './gameUI.js';
 
+
 class Game {
     constructor() {
         this.currentLevel = 1;
