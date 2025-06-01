@@ -662,9 +662,7 @@ const wallMaterial = new THREE.MeshStandardMaterial({
                     setTimeout(() => {
                         endMarker.scale.y = 1000;
                         endMarker.position.y = 0.05 + (0.1 * 1000) / 2;
-                    }, 10000);
-                    }
-                }
+                    }, 20000);
                 }
             }
         }
@@ -675,19 +673,20 @@ const wallMaterial = new THREE.MeshStandardMaterial({
         console.log(group);
         return group;
     }
+}}
 
     getStartAndEnd() {
-        return {
-            start: {
-                x: this.startPos.x * this.cellSize,
-                y:  -this.wallHeight,
-                z: this.startPos.y * this.cellSize
-            },
-            end: {
-                x: this.endPos.x * this.cellSize,
-                y: 0.03 + (( this.mazeLevels.length) * this.wallHeight ) - this.wallHeight / 2,
-                z: this.endPos.y * this.cellSize
-            }
-        };
+            return {
+                start: {
+                    x: this.startPos.x * this.cellSize,
+                    y: -this.wallHeight,
+                    z: this.startPos.y * this.cellSize
+                },
+                end: {
+                    x: this.endPos.x * this.cellSize,
+                    y: 0.03 + ((this.mazeLevels.length) * this.wallHeight) - this.wallHeight / 2,
+                    z: this.endPos.y * this.cellSize
+                }
+            };
     }
 }
