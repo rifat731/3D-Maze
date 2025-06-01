@@ -11,11 +11,13 @@ export class MazeGenerator {
         this.wallThickness = 0.5;
         this.maze = Array(height).fill().map(() => Array(width).fill(1));
         this.visited = Array(height).fill().map(() => Array(width).fill(false));
+
         this.generateStartAndEnd();
     }
 
     generateStartAndEnd() {
         const safeDistance = 2;
+
         this.startPos = {
             x: safeDistance + Math.floor(Math.random() * (this.width - 2 * safeDistance)),
             y: safeDistance + Math.floor(Math.random() * (this.height - 2 * safeDistance))
@@ -68,6 +70,7 @@ export class MazeGenerator {
         this.generateMaze(this.startPos.x, this.startPos.y);
         
         this.ensureEndReachable();
+
         return this.createMazeGeometry();
     }
 
@@ -222,7 +225,6 @@ export class MazeGenerator {
             0,
             (this.height * this.cellSize) / 2 - this.cellSize / 2
         );
-        floor.frustumCulled = true;
         group.add(floor);
 
 
@@ -252,77 +254,66 @@ export class MazeGenerator {
             emissiveIntensity: 0.2
         });
 
-        const wallGeometry = new THREE.BoxGeometry(
-            this.cellSize,
-            this.wallHeight,
-            this.cellSize
-        );
-        const sideGeometry = new THREE.BoxGeometry(
-            this.wallThickness,
-            this.wallHeight,
-            this.cellSize
-        );
-        const frontGeometry = new THREE.BoxGeometry(
-            this.cellSize,
-            this.wallHeight,
-            this.wallThickness
-        );
-
-        const wallInstances = new THREE.InstancedMesh(wallGeometry, wallMaterial, this.width * this.height * 4);
-        const sideInstances = new THREE.InstancedMesh(sideGeometry, wallMaterial, this.width * this.height * 2);
-        const frontInstances = new THREE.InstancedMesh(frontGeometry, wallMaterial, this.width * this.height * 2);
-
-        let wallCount = 0;
-        let sideCount = 0;
-        let frontCount = 0;
-
-        const matrix = new THREE.Matrix4();
-        const position = new THREE.Vector3();
-        const quaternion = new THREE.Quaternion();
-        const scale = new THREE.Vector3(1, 1, 1);
+        const walls = new THREE.Group();
 
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 if (this.maze[y][x] === 1) {
-                    position.set(
+                    const wallGeometry = new THREE.BoxGeometry(
+                        this.cellSize,
+                        this.wallHeight,
+                        this.cellSize
+                    );
+                    const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+                    wall.position.set(
                         x * this.cellSize,
                         this.wallHeight / 2,
                         y * this.cellSize
                     );
-                    matrix.compose(position, quaternion, scale);
-                    wallInstances.setMatrixAt(wallCount++, matrix);
+                    walls.add(wall);
 
-                    position.set(
-                        x * this.cellSize - this.cellSize/2 + this.wallThickness/2,
+                    const sideGeometry = new THREE.BoxGeometry(
+                        this.wallThickness,
+                        this.wallHeight,
+                        this.cellSize
+                    );
+                    const frontGeometry = new THREE.BoxGeometry(
+                        this.cellSize,
+                        this.wallHeight,
+                        this.wallThickness
+                    );
+
+                    const leftWall = new THREE.Mesh(sideGeometry, wallMaterial);
+                    leftWall.position.set(
+                        x * this.cellSize - this.cellSize / 2 + this.wallThickness / 2,
                         this.wallHeight / 2,
                         y * this.cellSize
                     );
-                    matrix.compose(position, quaternion, scale);
-                    sideInstances.setMatrixAt(sideCount++, matrix);
+                    walls.add(leftWall);
 
-                    position.set(
-                        x * this.cellSize + this.cellSize/2 - this.wallThickness/2,
+                    const rightWall = new THREE.Mesh(sideGeometry, wallMaterial);
+                    rightWall.position.set(
+                        x * this.cellSize + this.cellSize / 2 - this.wallThickness / 2,
                         this.wallHeight / 2,
                         y * this.cellSize
                     );
-                    matrix.compose(position, quaternion, scale);
-                    sideInstances.setMatrixAt(sideCount++, matrix);
+                    walls.add(rightWall);
 
-                    position.set(
+                    const frontWall = new THREE.Mesh(frontGeometry, wallMaterial);
+                    frontWall.position.set(
                         x * this.cellSize,
                         this.wallHeight / 2,
                         y * this.cellSize - this.cellSize / 2 + this.wallThickness / 2
                     );
-                    matrix.compose(position, quaternion, scale);
-                    frontInstances.setMatrixAt(frontCount++, matrix);
+                    walls.add(frontWall);
 
-                    position.set(
+                    const backWall = new THREE.Mesh(frontGeometry, wallMaterial);
+                    backWall.position.set(
                         x * this.cellSize,
                         this.wallHeight / 2,
                         y * this.cellSize + this.cellSize / 2 - this.wallThickness / 2
                     );
-                    matrix.compose(position, quaternion, scale);
-                    frontInstances.setMatrixAt(frontCount++, matrix);
+                    walls.add(backWall);
                 } else if (x === this.startPos.x && y === this.startPos.y) {
                     const startMarker = new THREE.Mesh(
                         new THREE.BoxGeometry(this.cellSize, 0.1, this.cellSize),
@@ -333,7 +324,6 @@ export class MazeGenerator {
                         0.05,
                         y * this.cellSize
                     );
-                    startMarker.frustumCulled = true;
                     group.add(startMarker);
                 } else if (x === this.endPos.x && y === this.endPos.y) {
                     const endMarker = new THREE.Mesh(
@@ -345,7 +335,6 @@ export class MazeGenerator {
                         0.05,
                         y * this.cellSize
                     );
-                    endMarker.frustumCulled = true;
                     group.add(endMarker);
 
                   
@@ -356,18 +345,6 @@ export class MazeGenerator {
                 }
             }
         }
-
-        wallInstances.count = wallCount;
-        sideInstances.count = sideCount;
-        frontInstances.count = frontCount;
-
-        wallInstances.frustumCulled = true;
-        sideInstances.frustumCulled = true;
-        frontInstances.frustumCulled = true;
-
-        group.add(wallInstances);
-        group.add(sideInstances);
-        group.add(frontInstances);
 
         group.add(walls);
         return group;
@@ -387,5 +364,4 @@ export class MazeGenerator {
             }
         };
     }
-}
 
