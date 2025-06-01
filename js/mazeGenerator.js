@@ -518,46 +518,59 @@ wallTexture.wrapS = THREE.RepeatWrapping;
 wallTexture.wrapT = THREE.RepeatWrapping;
 
 const wallMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-        baseTexture: { value: wallTexture },
-        lightDirection: { value: new THREE.Vector3(0.5, 1, 0.5).normalize() },
-        lightColor: { value: new THREE.Color(0xffffff) },
-    },
-    vertexShader: `
-        varying vec3 vNormal;
-        varying vec2 vUv;
+  uniforms: {
+    baseTexture: { value: wallTexture }, // your wall/floor texture
+    lightDirection: { value: new THREE.Vector3(1, 1, 1).normalize() },
+    lightColor: { value: new THREE.Color(1, 1, 1) },
+    ...THREE.UniformsLib.fog // Inject fog uniforms from the scene
+  },
+  vertexShader: `
+    varying vec3 vNormal;
+    varying vec2 vUv;
+    varying float vFogDepth;
 
-        void main() {
-            vNormal = normalize(normalMatrix * normal);
-            vUv = uv;
+    void main() {
+        vNormal = normalize(normalMatrix * normal);
+        vUv = uv;
 
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-    `,
-    fragmentShader: `
-      uniform sampler2D baseTexture;
-uniform vec3 lightDirection;
-uniform vec3 lightColor;
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+        vFogDepth = -mvPosition.z;
 
-varying vec3 vNormal;
-varying vec2 vUv;
+        gl_Position = projectionMatrix * mvPosition;
+    }
+  `,
+  fragmentShader: `
+    uniform sampler2D baseTexture;
+    uniform vec3 lightDirection;
+    uniform vec3 lightColor;
 
-void main() {
-    float lambert = max(dot(vNormal, lightDirection), 0.0);
-    lambert = pow(lambert, 0.5);
-    float ambient = 0.4;
-    float lighting = ambient + (1.0 - ambient) * lambert;
+    uniform vec3 fogColor;
+    uniform float fogNear;
+    uniform float fogFar;
 
-    vec4 texColor = texture2D(baseTexture, vUv);
-    vec3 color = texColor.rgb * lightColor * lighting;
+    varying vec3 vNormal;
+    varying vec2 vUv;
+    varying float vFogDepth;
 
-    gl_FragColor = vec4(color, texColor.a);
-}
+    void main() {
+        float lambert = max(dot(vNormal, lightDirection), 0.0);
+        lambert = pow(lambert, 0.5);
+        float ambient = 0.4;
+        float lighting = ambient + (1.0 - ambient) * lambert;
 
-    `,
-    side: THREE.DoubleSide,
-    clippingPlanes: [this.clipPlane], // <-- Pass clipping plane here
-    clipShadows: true,
+        vec4 texColor = texture2D(baseTexture, vUv);
+        vec3 litColor = texColor.rgb * lightColor * lighting;
+
+        float fogFactor = smoothstep(fogNear, fogFar, vFogDepth);
+        vec3 finalColor = mix(litColor, fogColor, fogFactor);
+
+        gl_FragColor = vec4(finalColor, texColor.a);
+    }
+  `,
+  side: THREE.DoubleSide,
+  fog: true, // Enables fog integration
+  clippingPlanes: [this.clipPlane],
+  clipShadows: true
 });
 
 

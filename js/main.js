@@ -15,11 +15,11 @@ class Game {
         this.frameCount = 0;
         this.frameINterval =  30;
         this.previousDirection = new THREE.Vector3();
-         this.guideLine = null;
+
     }
     
 
-      initialize() {
+    initialize() {
         this.scene = new THREE.Scene();
         this.UISCENE = new THREE.Scene();
         this.scene.background = new THREE.Color(0x87CEEB);
@@ -39,6 +39,7 @@ class Game {
             10
         );
         this.scene.fog = new THREE.Fog(0xcccccc, 10, 30);
+      
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true, stencil:true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -48,32 +49,39 @@ class Game {
         document.body.appendChild(this.renderer.domElement);
         const clipHeight = 10; 
         this.clipPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
+        
+       // this.renderer.clippingPlanes = [this.clipPlane];
 
         this.setupLighting();
 
         this.controls = new PointerLockControls(this.camera, document.body);
 
         this.player = new Player(this.camera, this.scene);
+        //this.camera.add(clipPlane);
+
+        
 
         this.setupMaze();
+        
 
         this.gameUI = new GameUI();
         this.gameUI.createButtons(this.UISCENE, this);
 
         this.setupEventListeners();
-
-        // --- Create the guide line after maze setup ---
-        this.createGuideLine();
+        
 
         this.animate();
 
         document.getElementById('loading-screen').style.display = 'none';
+        
     }
 
     setupMaze() {
         const baseSize = 15;
         const mazeSize = baseSize + (this.currentLevel - 1) * 2;
 
+        
+        
         this.mazeGenerator = new MazeGenerator(mazeSize, mazeSize, this.scene, this.amountOfFloors, this.clipPlane);
         
         this.maze = this.mazeGenerator.generate();
@@ -85,122 +93,6 @@ class Game {
         this.camera.position.y = start.y;
         this.camera.position.x = start.x;
         this.camera.position.z = start.z;
-    }
-
-    createGuideLine() {
-    if (this.guideLine) {
-        this.scene.remove(this.guideLine);
-    }
-
-    const points = [new THREE.Vector3(), new THREE.Vector3()];
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(6); // 2 points * 3 components (x, y, z)
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-    const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
-    this.guideLine = new THREE.Line(geometry, material);
-    this.guideLine.name = "GuideLine";
-    this.scene.add(this.guideLine);
-}
-
-
-    updateGuideLine() {
-        if (!this.guideLine) return;
-
-        // Get player position
-        const playerPos = this.camera.position.clone();
-
-        // Get end position from maze generator
-        const { end } = this.mazeGenerator.getStartAndEnd();
-
-        // Update line geometry points
-        const positions = this.guideLine.geometry.attributes.position.array;
-
-        // Start point = player position
-        positions[0] = playerPos.x;
-        positions[1] = playerPos.y + 0.5; // slightly above player height
-        positions[2] = playerPos.z;
-
-        // End point = maze end
-        positions[3] = end.x;
-        positions[4] = end.y + 0.5; // slightly above end point
-        positions[5] = end.z;
-
-        this.guideLine.geometry.attributes.position.needsUpdate = true;
-    }
-
-    animate() {
-        requestAnimationFrame(() => this.animate());
-
-        this.gameUI.update();
-        this.renderer.clear();
-
-        if (this.controls.isLocked) {
-            this.player.update();
-            this.checkEndReached();
-            this.clipPlane.constant = this.camera.position.y + 20;
-
-            // Update the guide line every frame
-            this.updateGuideLine();
-
-            this.frameCount++;
-            var camDirection = new THREE.Vector3();
-            this.camera.getWorldDirection(camDirection);
-
-            const angleChange = this.previousDirection.dot(camDirection);
-
-            const angle = Math.acos(THREE.MathUtils.clamp(angleChange, -1, 1));
-
-            if (angle > 0.05) {
-                this.frameCount = this.frameINterval;
-            }
-            this.previousDirection.copy(camDirection);
-
-            if (this.frameCount % this.frameINterval === 0) {
-                this.scene.traverse((object) => {
-                    if(object.name == "Floor") {
-                        const playerY = new THREE.Vector3(0, this.camera.position.y, 0);
-                        const objectY = new THREE.Vector3(0, object.position.y, 0);
-                        const ydistance = playerY.distanceTo(objectY);
-                        if(ydistance > 20) {
-                            object.visible = false;
-                        } else {
-                            object.visible = true;
-                        }
-                    } else if (object.isMesh && object.name != "endMarker" && object.name != "GuideLine") {
-                        const distance = this.camera.position.distanceTo(object.position);
-                        const toObject = new THREE.Vector3().subVectors(object.position, this.camera.position).normalize();
-                        const dot = camDirection.dot(toObject);
-                        const playerY = new THREE.Vector3(0,this.camera.position.y,0);
-                        const objectY = new THREE.Vector3(0,object.position.y,0);
-                        const ydistance = playerY.distanceTo(objectY);
-                        if(ydistance > 15 ) {
-                            object.visible = false;
-                        } else if(dot < 0) {
-                            if(distance > 30) {
-                                object.visible = false;
-                            } else {
-                                object.visible = true;
-                            }
-                        } else if(dot > 0 && distance > 100) {
-                            object.visible = false;
-                        } else {
-                            object.visible = true;
-                        }
-                    }
-                });
-            }
-        } else {
-            this.renderer.render(this.UISCENE, this.uiCamera);
-        }
-        if(this.loadingLevel == true) {
-            this.loadingLevel = false;
-            this.frameCount = this.frameINterval;
-            document.getElementById('loading-screen').style.display = 'none';
-        }
-
-        this.renderer.render(this.scene, this.camera);
-        this.renderer.clearDepth();
     }
 
     setupLighting() {
