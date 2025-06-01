@@ -24,6 +24,8 @@ export class MazeGenerator {
         this.clipPlane = clip;
     }
 
+
+    
     generateStartAndEnd() {
         const safeDistance = 2;
         
